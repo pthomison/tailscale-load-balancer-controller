@@ -1,15 +1,3 @@
-cluster-create: registry-create
-	k3d cluster create -c ./k3d-config.yaml
-
-cluster-delete:
-	k3d cluster delete tailscale-local-cluster
-
-registry-create:
-	k3d registry create registry -p 15555
-
-registry-delete:
-	k3d registry delete registry
-
 tailscale-shell: tailscale-image
 	docker run -it --rm --entrypoint="/bin/bash" tailscale-image:latest 
 
