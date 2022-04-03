@@ -18,7 +18,7 @@ parser.add_argument("--ingressclass", required=True, help="Ingress Class To Targ
 args = parser.parse_args()
 
 NAMESPACE="tailscale"
-SERVICENAME="nginx-ingress-ingress-nginx-controller"
+SERVICENAME="tailscale-ingress-controller-ingress-nginx-controller"
 
 IP=args.ip
 INGRESSCLASS=args.ingressclass
@@ -35,32 +35,16 @@ networkingV1 = client.NetworkingV1Api()
 coreV1 = client.CoreV1Api()
 
 ### Main Loop
-
 logging.info(f"Starting Update IP Loop")
 logging.info(f"Ingress Class Target: {INGRESSCLASS}")
 logging.info(f"IP To Inject: {IP}")
 
-# find self-service
+while True:
+	# find self-service
+	service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
 
-service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
-pprint.pprint(service)
+	if service.spec.external_ip != IP:
+		patchedService = coreV1.patch_namespaced_service(SERVICENAME, NAMESPACE, external_ip)
+		pprint.pprint(patchedService)
 
-pprint.pprint(external_ip)
-
-patchedService = coreV1.patch_namespaced_service(SERVICENAME, NAMESPACE, external_ip)
-pprint.pprint(patchedService)
-
-
-# watch ingresses for changes
-# w = watch.Watch()
-# for event in w.stream(networkingV1.list_ingress_for_all_namespaces):
-# 	logging.info("noop")
-
-# 	ingress_name = event['object'].metadata.namespace
-	
-# 	ingress_namespace = event['object'].metadata.namespace
-# 	ingress_class = event['object'].spec.ingress_class_name
-
-# 	logging.info(f"Ingress Name: {ingress_name}")
-# 	logging.info(f"Ingress Namespace: {ingress_namespace}")
-# 	logging.info(f"Ingress Class: {ingress_class}")
+	time.sleep(30)
