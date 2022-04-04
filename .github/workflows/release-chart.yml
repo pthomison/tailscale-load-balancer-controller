@@ -18,6 +18,8 @@ jobs:
 
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.4.0
-
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          
     # - name: Set Tag
     #   run: echo "tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
