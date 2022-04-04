@@ -1,0 +1,23 @@
+name: Release Chart
+
+# on:  
+#   push:
+#     tags:
+#       - "*.*.*"
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.4.0
+
+    # - name: Set Tag
+    #   run: echo "tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV

@@ -13,5 +13,3 @@ push: tailscale-image
 deploy:
 	helm upgrade -i tailscale-ingress-controller ./chart -n tailscale
 	kubectl rollout restart deployment tailscale-ingress-controller-ingress-nginx-controller -n tailscale
-
-clean: cluster-delete registry-delete
