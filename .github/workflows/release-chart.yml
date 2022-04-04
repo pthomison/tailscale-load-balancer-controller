@@ -1,13 +1,9 @@
 name: Release Chart
 
-# on:  
-#   push:
-#     tags:
-#       - "*.*.*"
-
-on:
+on:  
   push:
-    branches: [ main ]
+    tags:
+      - "*.*.*"
 
 jobs:
   build_and_push:
@@ -20,6 +16,3 @@ jobs:
       uses: helm/chart-releaser-action@v1.4.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          
-    # - name: Set Tag
-    #   run: echo "tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
