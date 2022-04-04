@@ -13,7 +13,7 @@ ingress-nginx:
 
     extraContainers:
       - name: tailscale-ingress
-        image: host.k3d.internal:15555/tailscale-image:latest
+        image: pthomison/tailscale-ingress-controller:b01957a
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /opt/tailscale/
