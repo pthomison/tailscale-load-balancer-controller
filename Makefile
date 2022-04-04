@@ -11,5 +11,5 @@ push: tailscale-image
 	docker push 127.0.0.1:15555/tailscale-image:latest
 
 deploy:
-	helm upgrade -i tailscale-ingress-controller ./chart -n tailscale
+	helm upgrade -i tailscale-ingress-controller ./charts/tailscale-ingress-controller -n tailscale
 	kubectl rollout restart deployment tailscale-ingress-controller-ingress-nginx-controller -n tailscale
