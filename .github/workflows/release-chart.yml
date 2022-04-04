@@ -1,9 +1,11 @@
 name: Release Chart
 
-on:  
+on:
   push:
     tags:
       - "*.*.*"
+
+  workflow_dispatch: {}
 
 jobs:
   build_and_push:
