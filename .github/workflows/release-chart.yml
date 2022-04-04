@@ -24,6 +24,11 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+    - name: Adding bngi
+      run: |
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo update
+
     - name: Install Helm
       uses: azure/setup-helm@v1
       with:
