@@ -2,7 +2,7 @@
 apiVersion: v2
 type: application
 appVersion: "0.0.1"
-version: 0.0.2
+version: 0.0.3
 name: tailscale-ingress-controller
 description: A wrapper around the nginx ingress controller, allowing it to join tailscale networks
 sources:
