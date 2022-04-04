@@ -37,7 +37,7 @@ while True:
 	# find self-service
 	service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
 
-	if service.spec.external_i_ps[0] != IP:
+	if service.spec.external_i_ps == None or service.spec.external_i_ps[0] != IP:
 		patchedService = coreV1.patch_namespaced_service(SERVICENAME, NAMESPACE, external_ip)
 		pprint.pprint(patchedService)
 

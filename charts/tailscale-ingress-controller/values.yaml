@@ -14,13 +14,12 @@ ingress-nginx:
     extraContainers:
       - name: tailscale-ingress
         image: pthomison/tailscale-ingress-controller:b01957a
-        imagePullPolicy: Always
         volumeMounts:
-        - mountPath: /opt/tailscale/
-          name: opt-tailscale
+        - name: token
+          mountPath: "/opt/tailscale"
+          readOnly: true
 
     extraVolumes:
-      - name: opt-tailscale
-        hostPath:
-          path: /opt/tailscale/
-          type: DirectoryOrCreate
+      - name: token
+        secret:
+          secretName: tailscale-token

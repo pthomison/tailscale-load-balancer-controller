@@ -1,0 +1,10 @@
+ingress-nginx:
+  controller:
+    extraContainers:
+      - name: tailscale-ingress
+        image: host.k3d.internal:15555/tailscale-ingress-controller:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: token
+          mountPath: "/opt/tailscale"
+          readOnly: true

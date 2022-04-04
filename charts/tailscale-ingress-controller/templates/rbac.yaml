@@ -5,7 +5,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: tailscale-ingress-controller-rbac
+  name: {{ .Release.Name }}-rbac
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-ingress-nginx
