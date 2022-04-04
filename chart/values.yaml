@@ -1,0 +1,26 @@
+ingress-nginx:
+  controller:
+    ingressClass: "tailscale"
+
+    ingressClassResource:
+      name: "tailscale"
+
+    publishService:
+      enabled: true
+
+    service:
+      type: NodePort
+
+    extraContainers:
+      - name: tailscale-ingress
+        image: host.k3d.internal:15555/tailscale-image:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /opt/tailscale/
+          name: opt-tailscale
+
+    extraVolumes:
+      - name: opt-tailscale
+        hostPath:
+          path: /opt/tailscale/
+          type: DirectoryOrCreate

@@ -11,7 +11,6 @@ echo "Started Tailscale Tunnel"
 
 python3 \
 	/root/update-ips.py \
-		--ingressclass="tailscale" \
+		--namespace="tailscale" \
+		--service="tailscale-ingress-controller-ingress-nginx-controller" \
 		--ip="$(tailscale ip -4)"
-
-sleep infinity

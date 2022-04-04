@@ -1,22 +1,20 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: tailscale-ingress-controller-rbac
-  namespace: tailscale
+  name: {{ .Release.Name }}-rbac
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: tailscale-ingress-controller-rbac
 subjects:
 - kind: ServiceAccount
-  name: nginx-ingress-ingress-nginx
-  namespace: tailscale
+  name: {{ .Release.Name }}-ingress-nginx
+  namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: tailscale-ingress-controller-rbac
-  namespace: tailscale
+  name: {{ .Release.Name }}-rbac
 rules:
 - apiGroups:
   - ""
@@ -24,4 +22,3 @@ rules:
   - services
   verbs:
   - patch
-
