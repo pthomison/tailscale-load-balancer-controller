@@ -10,9 +10,11 @@ RUN dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tails
 
 RUN dnf install -y python3 python3-kubernetes
 
+RUN dnf install -y dumb-init
+
 COPY update-ips.py /root/update-ips.py
 COPY entrypoint.sh /root/entrypoint.sh
 
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/usr/bin/dumb-init", "/bin/bash"]
 CMD ["/root/entrypoint.sh"]

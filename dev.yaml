@@ -8,3 +8,5 @@ ingress-nginx:
         - name: token
           mountPath: "/opt/tailscale"
           readOnly: true
+        - name: tailscale-storage
+          mountPath: "/var/lib/tailscale/"
