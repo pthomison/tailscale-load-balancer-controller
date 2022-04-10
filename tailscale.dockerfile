@@ -10,7 +10,9 @@ RUN dnf update -y && \
 	\
 	dnf install -y python3 python3-kubernetes && \
 	\
-	dnf install -y dumb-init
+	dnf install -y dumb-init && \
+	\
+	dnf clean all
 
 COPY update-ips.py /root/update-ips.py
 COPY entrypoint.sh /root/entrypoint.sh
