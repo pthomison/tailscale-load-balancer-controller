@@ -8,7 +8,7 @@ roleRef:
   name: {{ .Release.Name }}-rbac
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-ingress-nginx
+  name: {{ .Release.Name }}-nic
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -2,6 +2,11 @@
 
 set -xe
 
+echo "Debug"
+
+echo "PodName: ${POD_NAME}"
+echo "PodNamespace: ${POD_NAMESPACE}"
+
 echo "Starting Tailscale Tunnel"
 
 tailscaled --tun "userspace-networking" &
@@ -11,6 +16,6 @@ echo "Started Tailscale Tunnel"
 
 python3 \
 	/root/update-ips.py \
-		--namespace="tailscale" \
-		--service="tailscale-ingress-controller-ingress-nginx-controller" \
+		--namespace="${POD_NAMESPACE}" \
+		--service="${SERVICE_NAME}" \
 		--ip="$(tailscale ip -4)"

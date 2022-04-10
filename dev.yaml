@@ -1,12 +1,44 @@
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  size: "100Mi"
+
 ingress-nginx:
   controller:
+    ingressClass: "tailscale-debug"
+
+    ingressClassResource:
+      name: "tailscale-debug"
+
+    publishService:
+      enabled: true
+
+    service:
+      type: NodePort
+
     extraContainers:
       - name: tailscale-ingress
         image: host.k3d.internal:15555/tailscale-ingress-controller:latest
-        imagePullPolicy: Always
         volumeMounts:
         - name: token
           mountPath: "/opt/tailscale"
           readOnly: true
         - name: tailscale-storage
           mountPath: "/var/lib/tailscale/"
+
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: SERVICE_NAME
+          value: tic-debug-nic-controller
+
+    extraVolumes:
+      - name: token
+        secret:
+          secretName: tailscale-token
+      - name: tailscale-storage
+        persistentVolumeClaim:
+          claimName: tic-debug-storage

@@ -1,4 +1,12 @@
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  size: "100Mi"
+
+
 ingress-nginx:
+  nameOverride: "nic"
+
   controller:
     ingressClass: "tailscale"
 
@@ -12,7 +20,7 @@ ingress-nginx:
       type: NodePort
 
     extraContainers:
-      - name: tailscale-ingress
+      - name: tailscale-ingress-controller
         image: pthomison/tailscale-ingress-controller:4da21cd
         volumeMounts:
         - name: token
@@ -21,10 +29,20 @@ ingress-nginx:
         - name: tailscale-storage
           mountPath: "/var/lib/tailscale/"
 
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: SERVICE_NAME
+          value: "tailscale-ingress-controller-debug-nic-controller"
+
+
     extraVolumes:
       - name: token
         secret:
           secretName: tailscale-token
       - name: tailscale-storage
         persistentVolumeClaim:
-          claimName: tailscale-storage
+          claimName: tailscale-ingress-controller-storage
