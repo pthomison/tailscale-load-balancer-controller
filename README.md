@@ -12,7 +12,7 @@ helm repo update
 
 Inject your token
 ```
-tbd
+kubectl create secret generic tailscale-token --from-literal=token=supersecret
 ```
 
 Install the controller
