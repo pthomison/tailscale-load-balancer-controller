@@ -36,7 +36,7 @@ ingress-nginx:
               apiVersion: v1
               fieldPath: metadata.namespace
         - name: SERVICE_NAME
-          value: "tailscale-ingress-controller-debug-nic-controller"
+          value: "tailscale-ingress-controller-nic-controller"
 
 
     extraVolumes:
