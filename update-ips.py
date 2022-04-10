@@ -36,11 +36,14 @@ logging.info(f"IP To Inject: {IP}")
 while True:
     # find self-service
     service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
+    # logging.info(f"Service: {service.metadata.name}/{service.metadata.namespace} : { ', '.join(service.spec.external_i_ps) }")
 
     if service.spec.external_i_ps == None or service.spec.external_i_ps[0] != IP:
         patchedService = coreV1.patch_namespaced_service(
             SERVICENAME, NAMESPACE, external_ip
         )
-        pprint.pprint(patchedService)
+        logging.info(
+            f"Patched Service: {patchedService.metadata.name}/{patchedService.metadata.namespace} : {', '.join(service.spec.external_i_ps) }"
+        )
 
     time.sleep(30)
