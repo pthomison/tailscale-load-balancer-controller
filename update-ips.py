@@ -15,14 +15,14 @@ parser.add_argument("--service", required=True, help="Service Name To Inject IP 
 parser.add_argument("--namespace", required=True, help="Service Namespace")
 
 args = parser.parse_args()
-IP=args.ip
-SERVICENAME=args.service
-NAMESPACE=args.namespace
+IP = args.ip
+SERVICENAME = args.service
+NAMESPACE = args.namespace
 
 external_ip = {
-	"spec": {
-		"externalIPs": [IP],
-	}
+    "spec": {
+        "externalIPs": [IP],
+    }
 }
 
 ### K8S Setup
@@ -34,11 +34,13 @@ logging.info(f"Starting Update IP Loop")
 logging.info(f"IP To Inject: {IP}")
 
 while True:
-	# find self-service
-	service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
+    # find self-service
+    service = coreV1.read_namespaced_service(SERVICENAME, NAMESPACE)
 
-	if service.spec.external_i_ps == None or service.spec.external_i_ps[0] != IP:
-		patchedService = coreV1.patch_namespaced_service(SERVICENAME, NAMESPACE, external_ip)
-		pprint.pprint(patchedService)
+    if service.spec.external_i_ps == None or service.spec.external_i_ps[0] != IP:
+        patchedService = coreV1.patch_namespaced_service(
+            SERVICENAME, NAMESPACE, external_ip
+        )
+        pprint.pprint(patchedService)
 
-	time.sleep(30)
+    time.sleep(30)
