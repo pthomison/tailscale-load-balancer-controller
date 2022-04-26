@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.3-labs
-# update
-
 
 FROM fedora:35
+
+RUN echo "update yall"
 
 RUN dnf update -y && \
 	dnf install dnf-plugins-core -y && \
