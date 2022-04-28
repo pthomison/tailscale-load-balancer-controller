@@ -29,8 +29,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v2
       with:
-        # cache-from: type=registry,ref=pthomison/tailscale-ingress-controller:buildcache
-        # cache-to: type=registry,ref=pthomison/tailscale-ingress-controller:buildcache,mode=max
+        cache-from: type=registry,ref=pthomison/tailscale-ingress-controller:buildcache
+        cache-to: type=registry,ref=pthomison/tailscale-ingress-controller:buildcache,mode=max
         file: tailscale.dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
