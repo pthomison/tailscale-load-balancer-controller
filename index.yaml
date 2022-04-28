@@ -3,6 +3,26 @@ entries:
   tailscale-ingress-controller:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2022-04-28T17:26:27.235549075Z"
+    dependencies:
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: ~4
+    description: A wrapper around the nginx ingress controller, allowing it to join
+      tailscale networks
+    digest: 3cd7696614f1205dedc03374cd6745fd6c8cc6083d3a7408bdf21fe893eb25b0
+    maintainers:
+    - email: tbd@tbd.com
+      name: Patrick Thomison
+    name: tailscale-ingress-controller
+    sources:
+    - https://github.com/pthomison/tailscale-ingress-controller
+    type: application
+    urls:
+    - https://github.com/pthomison/tailscale-ingress-controller/releases/download/tailscale-ingress-controller-0.0.9/tailscale-ingress-controller-0.0.9.tgz
+    version: 0.0.9
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2022-04-26T20:37:55.582339341Z"
     dependencies:
     - name: ingress-nginx
@@ -161,4 +181,4 @@ entries:
     urls:
     - https://github.com/pthomison/tailscale-ingress-controller/releases/download/tailscale-ingress-controller-0.0.1/tailscale-ingress-controller-0.0.1.tgz
     version: 0.0.1
-generated: "2022-04-26T20:37:55.582506749Z"
+generated: "2022-04-28T17:26:27.235696275Z"
