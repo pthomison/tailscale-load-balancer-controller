@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.3-labs
 
-FROM pthomison/tailscale:v1.24.1
+FROM pthomison/tailscale:v1.24.2
 
 COPY requirements.txt /root/requirements.txt
 

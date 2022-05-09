@@ -2,8 +2,6 @@
 
 set -xe
 
-echo "Debug"
-
 echo "PodName: ${POD_NAME}"
 echo "PodNamespace: ${POD_NAMESPACE}"
 
