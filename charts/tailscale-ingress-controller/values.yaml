@@ -21,7 +21,7 @@ ingress-nginx:
 
     extraContainers:
       - name: tailscale-ingress-controller
-        image: pthomison/tailscale-ingress-controller:1d2dd1d
+        image: pthomison/tailscale-ingress-controller:26bc001
         volumeMounts:
         - name: token
           mountPath: "/opt/tailscale"
