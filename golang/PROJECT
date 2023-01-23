@@ -1,0 +1,12 @@
+domain: operator.pthomison.com
+layout:
+- go.kubebuilder.io/v4-alpha
+projectName: golang
+repo: github.com/pthomison/tailscale-ingress-controller
+resources:
+- controller: true
+  domain: operator.pthomison.com
+  group: networking.k8s.io
+  kind: Ingress
+  version: v1
+version: "3"
