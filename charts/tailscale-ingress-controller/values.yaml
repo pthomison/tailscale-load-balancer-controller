@@ -14,14 +14,29 @@ ingress-nginx:
       type: NodePort
 
     extraContainers:
-      - name: tailscale-ingress-controller
+      - name: tailscale
+        image: tailscale/tailscale:latest
+        env:
+        - name: TS_AUTH_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-token
+              key: token
+        - name: TS_KUBE_SECRET
+          value: tailscale-state
+        - name: TS_ACCEPT_DNS
+          value: "false"
+        - name: TS_USERSPACE
+          value: "false"
+          
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+    
+      - name: ip-updater
         image: pthomison/tailscale-ingress-controller:26bc001
-        volumeMounts:
-        - name: token
-          mountPath: "/opt/tailscale"
-          readOnly: true
-        - name: tailscale-storage
-          mountPath: "/var/lib/tailscale/"
 
         env:
         - name: POD_NAMESPACE
@@ -37,6 +52,3 @@ ingress-nginx:
       - name: token
         secret:
           secretName: tailscale-token
-      - name: tailscale-storage
-        persistentVolumeClaim:
-          claimName: tailscale-ingress-controller-storage

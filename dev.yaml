@@ -1,8 +1,3 @@
-persistence:
-  enabled: false
-  storageClass: "local-path"
-  size: "100Mi"
-
 ingress-nginx:
   controller:
     ingressClass: "tailscale-debug"
@@ -43,11 +38,6 @@ ingress-nginx:
 
       - name: tailscale-ingress
         image: host.k3d.internal:15555/tailscale-ingress-controller:latest
-        volumeMounts:
-        - name: token
-          mountPath: "/opt/tailscale"
-          readOnly: true
-
         env:
         - name: POD_NAMESPACE
           valueFrom:
