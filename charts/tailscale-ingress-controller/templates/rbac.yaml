@@ -20,5 +20,9 @@ rules:
   - ""
   resources:
   - services
+  - secrets
   verbs:
   - patch
+  - update
+  - get
+  - create

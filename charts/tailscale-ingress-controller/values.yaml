@@ -1,9 +1,3 @@
-persistence:
-  enabled: true
-  storageClass: "local-path"
-  size: "100Mi"
-
-
 ingress-nginx:
   nameOverride: "nic"
 

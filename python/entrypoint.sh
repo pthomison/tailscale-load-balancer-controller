@@ -2,18 +2,23 @@
 
 set -xe
 
-echo "PodName: ${POD_NAME}"
 echo "PodNamespace: ${POD_NAMESPACE}"
 
-echo "Starting Tailscale Tunnel"
+# Wait for tailscale tunnel
+echo "Waiting For Tailscale Tunnel"
 
-tailscaled --tun "userspace-networking" &
-tailscale up --auth-key file:/opt/tailscale/token
+until ifconfig | grep -A 1 "tailscale0" | egrep -o "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | uniq | grep "100.";
+do
+	sleep 1
+done
 
-echo "Started Tailscale Tunnel"
+TAILSCALE_IP="$(ifconfig | grep -A 1 "tailscale0" | egrep -o "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | uniq | grep "100.")"
 
+echo "Tunnel Established; IP=${TAILSCALE_IP}"
+
+echo "Starting IP Updater"
 python3 \
 	/root/update-ips.py \
 		--namespace="${POD_NAMESPACE}" \
 		--service="${SERVICE_NAME}" \
-		--ip="$(tailscale ip -4)"
+		--ip="${TAILSCALE_IP}"

@@ -1,4 +1,4 @@
-python-shell: tailscale-image
+python-shell: python-image
 	docker run -it --rm --entrypoint="/bin/bash" tailscale-ingress-controller:latest
 
 python-image:
@@ -6,7 +6,7 @@ python-image:
 	docker buildx build . \
 	-t tailscale-ingress-controller:latest
 
-python-push: tailscale-image
+python-push: python-image
 	docker tag tailscale-ingress-controller:latest 127.0.0.1:15555/tailscale-ingress-controller:latest
 	docker push 127.0.0.1:15555/tailscale-ingress-controller:latest
 

@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": ".."
+		},
+		{
+			"path": "../../flux-environments"
+		},
+		{
+			"path": "../../../hack/tailscale/docs/k8s"
 		}
 	],
 	"settings": {}
