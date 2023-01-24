@@ -36,7 +36,7 @@ ingress-nginx:
             - NET_RAW
     
       - name: ip-updater
-        image: pthomison/tailscale-ingress-controller:26bc001
+        image: pthomison/tailscale-ingress-controller:25b230c
 
         env:
         - name: POD_NAMESPACE
