@@ -14,6 +14,57 @@ ingress-nginx:
     service:
       type: NodePort
 
+    extraInitContainers:
+      - name: tailscale-init
+        image: tailscale/tailscale:latest
+        env:
+        - name: TS_AUTH_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-token
+              key: token
+        - name: TS_KUBE_SECRET
+          value: tailscale-state
+        - name: TS_ACCEPT_DNS
+          value: "false"
+        - name: TS_USERSPACE
+          value: "false"
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: SERVICE_NAME
+          value: tic-debug-nic-controller
+          
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          /usr/local/bin/containerboot &
+          until ifconfig | grep -A 1 "tailscale0" | egrep -o "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | uniq | grep "100.";
+          do
+            sleep 1
+          done
+          echo "Init Container!"
+          ifconfig
+
+          TAILSCALE_IP="$(ifconfig | grep -A 1 "tailscale0" | egrep -o "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | uniq | grep "100.")"
+
+          python3 \
+            /root/update-ips.py \
+              --namespace="${POD_NAMESPACE}" \
+              --service="${SERVICE_NAME}" \
+              --ip="${TAILSCALE_IP}" \
+              --once
+
+
     extraContainers:
       - name: tailscale
         image: tailscale/tailscale:latest
