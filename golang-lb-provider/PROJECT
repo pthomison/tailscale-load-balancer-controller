@@ -3,4 +3,10 @@ layout:
 - go.kubebuilder.io/v4-alpha
 projectName: golang-lb-provider
 repo: github.com/pthomison/tailscale-loadbalancer-provider
+resources:
+- controller: true
+  domain: operator.pthomison.com
+  group: networking.k8s.io
+  kind: Ingress
+  version: v1
 version: "3"
