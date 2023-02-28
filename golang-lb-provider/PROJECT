@@ -1,0 +1,6 @@
+domain: operator.pthomison.com
+layout:
+- go.kubebuilder.io/v4-alpha
+projectName: golang-lb-provider
+repo: github.com/pthomison/tailscale-loadbalancer-provider
+version: "3"
