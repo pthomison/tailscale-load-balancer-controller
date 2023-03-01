@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	tailscaleImage = "registry.localhost:15000/tailscale-lb:ec33c5c"
+	tailscaleImage = "registry.localhost:15000/tailscale-lb:63bf45f"
 )
 
 func (lb *LoadBalancer) renderDeployment() {
