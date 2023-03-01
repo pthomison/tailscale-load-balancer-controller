@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	tailscaleImage = "registry.localhost:15000/tailscale-lb:latest"
+	tailscaleImage = "pthomison/tailscale-lb:latest"
 )
 
 // func tailscaleLBImage() string {

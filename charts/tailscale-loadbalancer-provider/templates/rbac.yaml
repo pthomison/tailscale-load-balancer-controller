@@ -1,0 +1,221 @@
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: rbac
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: controller-manager-sa
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: serviceaccount
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-controller-manager
+#   namespace: tailscale
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: Role
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: rbac
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: leader-election-role
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: role
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-leader-election-role
+#   namespace: tailscale
+# rules:
+# - apiGroups:
+#   - ""
+#   resources:
+#   - configmaps
+#   verbs:
+#   - get
+#   - list
+#   - watch
+#   - create
+#   - update
+#   - patch
+#   - delete
+# - apiGroups:
+#   - coordination.k8s.io
+#   resources:
+#   - leases
+#   verbs:
+#   - get
+#   - list
+#   - watch
+#   - create
+#   - update
+#   - patch
+#   - delete
+# - apiGroups:
+#   - ""
+#   resources:
+#   - events
+#   verbs:
+#   - create
+#   - patch
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   creationTimestamp: null
+#   name: tailscale-lb-provider-manager-role
+# rules:
+# - apiGroups:
+#   - ""
+#   resources:
+#   - configmaps
+#   verbs:
+#   - create
+#   - delete
+#   - get
+#   - list
+#   - update
+#   - watch
+# - apiGroups:
+#   - ""
+#   resources:
+#   - pods
+#   verbs:
+#   - create
+#   - delete
+#   - get
+#   - list
+#   - patch
+#   - update
+#   - watch
+# - apiGroups:
+#   - ""
+#   resources:
+#   - secrets
+#   verbs:
+#   - create
+#   - delete
+#   - get
+#   - list
+#   - update
+# - apiGroups:
+#   - ""
+#   resources:
+#   - services
+#   verbs:
+#   - get
+#   - list
+#   - patch
+#   - update
+#   - watch
+# - apiGroups:
+#   - apps
+#   resources:
+#   - deployments
+#   verbs:
+#   - create
+#   - delete
+#   - get
+#   - list
+#   - update
+#   - watch
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: kube-rbac-proxy
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: metrics-reader
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: clusterrole
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-metrics-reader
+# rules:
+# - nonResourceURLs:
+#   - /metrics
+#   verbs:
+#   - get
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: kube-rbac-proxy
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: proxy-role
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: clusterrole
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-proxy-role
+# rules:
+# - apiGroups:
+#   - authentication.k8s.io
+#   resources:
+#   - tokenreviews
+#   verbs:
+#   - create
+# - apiGroups:
+#   - authorization.k8s.io
+#   resources:
+#   - subjectaccessreviews
+#   verbs:
+#   - create
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: RoleBinding
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: rbac
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: leader-election-rolebinding
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: rolebinding
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-leader-election-rolebinding
+#   namespace: tailscale
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: Role
+#   name: tailscale-lb-provider-leader-election-role
+# subjects:
+# - kind: ServiceAccount
+#   name: tailscale-lb-provider-controller-manager
+#   namespace: tailscale
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: rbac
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: manager-rolebinding
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: clusterrolebinding
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-manager-rolebinding
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: tailscale-lb-provider-manager-role
+# subjects:
+# - kind: ServiceAccount
+#   name: tailscale-lb-provider-controller-manager
+#   namespace: tailscale
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: kube-rbac-proxy
+#     app.kubernetes.io/created-by: golang-lb-provider
+#     app.kubernetes.io/instance: proxy-rolebinding
+#     app.kubernetes.io/managed-by: kustomize
+#     app.kubernetes.io/name: clusterrolebinding
+#     app.kubernetes.io/part-of: golang-lb-provider
+#   name: tailscale-lb-provider-proxy-rolebinding
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: tailscale-lb-provider-proxy-role
+# subjects:
+# - kind: ServiceAccount
+#   name: tailscale-lb-provider-controller-manager
+#   namespace: tailscale

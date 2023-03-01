@@ -1,0 +1,13 @@
+---
+apiVersion: v2
+type: application
+appVersion: "0.0.1"
+version: 0.0.1
+name: tailscale-loadbalancer-provider
+description: ""
+sources:
+  - https://github.com/pthomison/tailscale-ingress-controller
+  
+maintainers:
+  - name: Patrick Thomison
+    email: tbd@tbd.com
