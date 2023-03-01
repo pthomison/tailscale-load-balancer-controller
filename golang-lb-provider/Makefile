@@ -26,12 +26,14 @@ SHELL = /usr/bin/env bash -o pipefail
 .PHONY: all
 all: build
 
-image-build-and-push:
+image-build-and-deploy:
 	IMG=$(CONTROLLER_BUILD_IMG) DOCKERFILE="./Dockerfile" $(MAKE) docker-build
 	IMG=$(TAILSCALE_LB_BUILD_IMG) DOCKERFILE="./tailscalelb.Dockerfile" $(MAKE) docker-build
 
 	IMG=$(CONTROLLER_BUILD_IMG) $(MAKE) docker-push
 	IMG=$(TAILSCALE_LB_BUILD_IMG) $(MAKE) docker-push
+
+	IMG=$(CONTROLLER_BUILD_IMG) $(MAKE) deploy
 
 
 ##@ General
@@ -127,7 +129,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${DEPLOY_IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 .PHONY: undeploy
