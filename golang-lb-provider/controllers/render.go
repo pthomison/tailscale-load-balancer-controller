@@ -10,6 +10,10 @@ const (
 	tailscaleImage = "registry.localhost:15000/tailscale-lb:latest"
 )
 
+// func tailscaleLBImage() string {
+
+// }
+
 func (lb *LoadBalancer) renderDeployment() {
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

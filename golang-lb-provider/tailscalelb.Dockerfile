@@ -12,6 +12,8 @@ EOF
 COPY <<COPYEOF /ip-monitor-entrypoint.sh
 #!/usr/bin/env bash
 
+sleep 10
+
 while true
 do
     IP=\"\$(tailscale --socket /tmp/tailscaled.sock ip --4)\"
@@ -22,7 +24,7 @@ do
         kubectl annotate pod \$HOSTNAME \"pthomison.com/tailscale-ip=\${IP}\"
     fi
 
-    sleep 5
+    sleep 30
 done
 COPYEOF
 
