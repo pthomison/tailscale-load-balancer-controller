@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"text/template"
 
 	"github.com/pthomison/errcheck"
@@ -18,6 +19,21 @@ func lbConfigMapName(svc *corev1.Service) string {
 	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
 }
 
+func lbKubeSecretName(svc *corev1.Service) string {
+	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
+}
+
+func lbServiceAccountName() string {
+
+	name := os.Getenv("SERVICE_ACCOUNT_NAME")
+
+	if name == "" {
+		return "testing-tailscale-pod"
+	}
+
+	return name
+}
+
 func NewLB(svc *corev1.Service) (*corev1.Pod, *corev1.ConfigMap) {
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -25,22 +41,48 @@ func NewLB(svc *corev1.Service) (*corev1.Pod, *corev1.ConfigMap) {
 			Namespace: defaultNamespace,
 		},
 		Spec: corev1.PodSpec{
-			ServiceAccountName: "testing-tailscale-pod",
+			ServiceAccountName: lbServiceAccountName(),
 			Containers: []corev1.Container{
 				{
 					Name:  "tailscale",
 					Image: "tailscale/tailscale:stable",
-					Env: []corev1.EnvVar{{
-						Name: "TS_AUTHKEY",
-						ValueFrom: &corev1.EnvVarSource{
-							SecretKeyRef: &corev1.SecretKeySelector{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: defaultSecret,
+					Env: []corev1.EnvVar{
+						{
+							Name: "TS_AUTHKEY",
+							ValueFrom: &corev1.EnvVarSource{
+								SecretKeyRef: &corev1.SecretKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: defaultSecret,
+									},
+									Key: defaultSecretKey,
 								},
-								Key: defaultSecretKey,
 							},
 						},
-					}},
+						{
+							Name:  "TS_KUBE_SECRET",
+							Value: lbKubeSecretName(svc),
+						},
+						{
+							Name:  "TS_ACCEPT_DNS",
+							Value: "false",
+						},
+						// {
+						// 	Name: "POD_NAME",
+						// 	ValueFrom: &corev1.EnvVarSource{
+						// 		FieldRef: &corev1.ObjectFieldSelector{
+						// 			FieldPath: "metadata.name",
+						// 		},
+						// 	},
+						// },
+						// {
+						// 	Name: "POD_NAMESPACE",
+						// 	ValueFrom: &corev1.EnvVarSource{
+						// 		FieldRef: &corev1.ObjectFieldSelector{
+						// 			FieldPath: "metadata.namespace",
+						// 		},
+						// 	},
+						// },
+					},
 				},
 				{
 					Name:  "haproxy",

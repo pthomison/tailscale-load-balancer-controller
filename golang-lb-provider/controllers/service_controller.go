@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pthomison/errcheck"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -42,9 +41,9 @@ type ServiceReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=operator.pthomison.com,resources=services,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=operator.pthomison.com,resources=services/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=operator.pthomison.com,resources=services/finalizers,verbs=update
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list
+//+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;update;delete
+//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -82,13 +81,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, nil
 	}
 
-	lbPod, cm := NewLB(&svc)
+	// lbPod, cm := NewLB(&svc)
 
-	err = r.Create(ctx, cm)
-	errcheck.Check(err)
+	// err = r.Create(ctx, cm)
+	// errcheck.Check(err)
 
-	err = r.Create(ctx, lbPod)
-	errcheck.Check(err)
+	// err = r.Create(ctx, lbPod)
+	// errcheck.Check(err)
 
 	return ctrl.Result{}, nil
 }

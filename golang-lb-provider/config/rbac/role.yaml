@@ -6,28 +6,29 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - operator.pthomison.com
+  - ""
   resources:
-  - services
+  - configmaps
   verbs:
   - create
   - delete
   - get
   - list
-  - patch
   - update
-  - watch
 - apiGroups:
-  - operator.pthomison.com
+  - ""
   resources:
-  - services/finalizers
+  - pods
   verbs:
+  - create
+  - delete
+  - get
+  - list
   - update
 - apiGroups:
-  - operator.pthomison.com
+  - ""
   resources:
-  - services/status
+  - services
   verbs:
   - get
-  - patch
-  - update
+  - list

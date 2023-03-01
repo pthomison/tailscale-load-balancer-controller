@@ -1,12 +1,12 @@
 # Adds namespace to all resources.
-namespace: golang-lb-provider-system
+namespace: tailscale
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
 # "wordpress" becomes "alices-wordpress".
 # Note that it should also match with the prefix (text before '-') of the namespace
 # field above.
-namePrefix: golang-lb-provider-
+namePrefix: tailscale-lb-provider-
 
 # Labels to add to all resources and selectors.
 #labels:
@@ -15,7 +15,7 @@ namePrefix: golang-lb-provider-
 #    someName: someValue
 
 resources:
-- ../crd
+# - ../crd
 - ../rbac
 - ../manager
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in
@@ -32,6 +32,7 @@ patchesStrategicMerge:
 # endpoint w/o any authn/z, please comment the following line.
 - manager_auth_proxy_patch.yaml
 
+- manager_config_patch.yaml
 
 
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in
