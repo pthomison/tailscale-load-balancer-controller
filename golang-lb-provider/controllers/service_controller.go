@@ -82,6 +82,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	var lbPodList corev1.PodList
+	var loadbalancerIP string
 	for {
 		_, selector := SelectorLabels(lb.svc)
 
@@ -97,12 +98,18 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			// fmt.Println(pod.Annotations)
 
 			if pod.Annotations["pthomison.com/tailscale-ip"] != "" {
-				fmt.Println(pod.Annotations["pthomison.com/tailscale-ip"])
+				loadbalancerIP = pod.Annotations["pthomison.com/tailscale-ip"]
 				break
 			}
 		}
-		time.Sleep(1 * time.Second)
+		fmt.Println("Waiting for tailscale IP")
+		time.Sleep(5 * time.Second)
 	}
+
+	lb.svc.Spec.ExternalIPs = []string{loadbalancerIP}
+
+	err = r.Update(ctx, lb.svc)
+	errcheck.Check(err)
 
 	// fmt.Printf("%v\n", lbPodList.Items)
 
