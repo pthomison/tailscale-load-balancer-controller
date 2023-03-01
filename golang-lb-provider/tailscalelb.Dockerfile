@@ -16,7 +16,7 @@ while true
 do
     IP=\"\$(tailscale --socket /tmp/tailscaled.sock ip --4)\"
 
-    if [[ "\$IP" != \"\" ]];
+    if [[ \"\$IP\" != \"\" ]];
     then
         echo "Update IP: \${IP}"
     fi
