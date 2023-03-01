@@ -9,4 +9,8 @@ resources:
   group: networking.k8s.io
   kind: Ingress
   version: v1
+- controller: true
+  domain: operator.pthomison.com
+  kind: Service
+  version: v1
 version: "3"
