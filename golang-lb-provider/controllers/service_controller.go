@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pthomison/errcheck"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -81,13 +82,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, nil
 	}
 
-	// lbPod, cm := NewLB(&svc)
+	lbPod, cm := NewLB(&svc)
 
-	// err = r.Create(ctx, cm)
-	// errcheck.Check(err)
+	err = r.Create(ctx, cm)
+	errcheck.Check(err)
 
-	// err = r.Create(ctx, lbPod)
-	// errcheck.Check(err)
+	err = r.Create(ctx, lbPod)
+	errcheck.Check(err)
 
 	return ctrl.Result{}, nil
 }
