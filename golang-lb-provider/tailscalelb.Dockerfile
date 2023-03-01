@@ -14,8 +14,13 @@ COPY <<COPYEOF /ip-monitor-entrypoint.sh
 
 while true
 do
-    IP="$(tailscale --socket /tmp/tailscaled.sock ip --4)"
-    echo "\${IP}"
+    IP="\$(tailscale --socket /tmp/tailscaled.sock ip --4)"
+
+    if [[ "\$IP" != "" ]];
+    then
+        echo "Update IP: \${IP}"
+    fi
+
     sleep 1
 done
 COPYEOF
