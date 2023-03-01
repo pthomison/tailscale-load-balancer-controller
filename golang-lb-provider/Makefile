@@ -33,7 +33,7 @@ image-build-and-deploy:
 	IMG=$(CONTROLLER_BUILD_IMG) $(MAKE) docker-push
 	IMG=$(TAILSCALE_LB_BUILD_IMG) $(MAKE) docker-push
 
-	IMG=$(CONTROLLER_BUILD_IMG) $(MAKE) deploy
+	IMG=$(CONTROLLER_DEPLOY_IMG) $(MAKE) deploy
 
 
 ##@ General
