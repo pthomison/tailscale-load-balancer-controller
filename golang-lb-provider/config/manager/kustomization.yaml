@@ -5,4 +5,6 @@ kind: Kustomization
 images:
 - name: controller
   newName: registry.localhost:15000/tailscale-lb-provider
-  newTag: f5624cc
+  newTag: 868383c
+commonAnnotations:
+  pthomison.com/image-tag: "12345"

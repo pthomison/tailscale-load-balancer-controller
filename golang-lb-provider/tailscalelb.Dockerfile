@@ -22,7 +22,7 @@ do
         kubectl annotate pod \$HOSTNAME \"pthomison.com/tailscale-ip=\${IP}\"
     fi
 
-    sleep 1
+    sleep 5
 done
 COPYEOF
 
