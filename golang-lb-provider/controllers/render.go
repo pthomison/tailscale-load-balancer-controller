@@ -77,9 +77,7 @@ func (lb *LoadBalancer) renderDeployment() {
 								MountPath: "/tmp",
 							}},
 							Command: []string{
-								"/bin/sh",
-								"-c",
-								"sleep 9999",
+								"/ip-monitor-entrypoint.sh",
 							},
 						},
 					},
