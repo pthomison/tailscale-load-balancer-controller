@@ -6,6 +6,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	tailscaleImage = "tailscale-lb:e090ea8"
+)
+
 func (lb *LoadBalancer) renderDeployment() {
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -29,7 +33,7 @@ func (lb *LoadBalancer) renderDeployment() {
 					Containers: []corev1.Container{
 						{
 							Name:  "tailscale",
-							Image: "tailscale/tailscale:stable",
+							Image: tailscaleImage,
 							Env: []corev1.EnvVar{
 								{
 									Name: "TS_AUTHKEY",
@@ -67,7 +71,7 @@ func (lb *LoadBalancer) renderDeployment() {
 						},
 						{
 							Name:  "ip-reflector",
-							Image: "tailscale/tailscale:stable",
+							Image: tailscaleImage,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name:      "tailscale-socket",
 								MountPath: "/tmp",

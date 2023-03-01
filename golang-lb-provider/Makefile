@@ -1,8 +1,11 @@
 TAG ?= $(shell git rev-parse --short HEAD)
 # Image URL to use all building/pushing image targets
-IMG ?= 127.0.0.1:15000/tailscale-lb-provider:$(TAG)
+CONTROLLER_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb-provider:$(TAG)
 # Image URL to use for deployment
-DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-provider:$(TAG)
+CONTROLLER_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-provider:$(TAG)
+
+TAILSCALE_LB_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb:$(TAG)
+
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25.0
 
@@ -22,6 +25,14 @@ SHELL = /usr/bin/env bash -o pipefail
 
 .PHONY: all
 all: build
+
+image-build-and-push:
+	IMG=$(CONTROLLER_BUILD_IMG) DOCKERFILE="./Dockerfile" $(MAKE) docker-build
+	IMG=$(TAILSCALE_LB_BUILD_IMG) DOCKERFILE="./tailscalelb.Dockerfile" $(MAKE) docker-build
+
+	IMG=$(CONTROLLER_BUILD_IMG) $(MAKE) docker-push
+	IMG=$(TAILSCALE_LB_BUILD_IMG) $(MAKE) docker-push
+
 
 ##@ General
 
@@ -77,7 +88,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	docker build -t ${IMG} .
+	docker build -t ${IMG} -f ${DOCKERFILE} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
