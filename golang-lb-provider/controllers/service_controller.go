@@ -85,10 +85,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	lbPod, cm := NewLB(&svc)
 
-	err = r.Create(ctx, cm)
+	err = r.Update(ctx, cm)
 	errcheck.Check(err)
 
-	err = r.Create(ctx, lbPod)
+	err = r.Update(ctx, lbPod)
 	errcheck.Check(err)
 
 	return ctrl.Result{}, nil
