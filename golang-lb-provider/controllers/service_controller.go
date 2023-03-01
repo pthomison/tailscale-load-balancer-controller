@@ -19,7 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/pthomison/errcheck"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,6 +80,31 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
+	var lbPodList corev1.PodList
+	for {
+		_, selector := SelectorLabels(lb.svc)
+
+		for len(lbPodList.Items) == 0 {
+			err = r.List(ctx, &lbPodList, &client.ListOptions{
+				LabelSelector: client.MatchingLabelsSelector{
+					Selector: selector,
+				},
+			})
+			errcheck.Check(err)
+
+			time.Sleep(1 * time.Second)
+		}
+
+		pod := lbPodList.Items[0]
+
+		fmt.Println(pod.Annotations)
+
+		break
+
+	}
+
+	fmt.Printf("%v\n", lbPodList.Items)
 
 	return ctrl.Result{}, nil
 }

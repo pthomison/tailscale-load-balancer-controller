@@ -8,6 +8,7 @@ import (
 
 	"github.com/pthomison/errcheck"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 func deploymentName(svc *corev1.Service) string {
@@ -20,6 +21,25 @@ func lbConfigMapName(svc *corev1.Service) string {
 
 func lbKubeSecretName(svc *corev1.Service) string {
 	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
+}
+
+func SelectorLabels(svc *corev1.Service) (map[string]string, labels.Selector) {
+
+	labelMap := make(map[string]string)
+
+	common_key := "app.kubernetes.io/name"
+	common_val := "tailscale-lb-provider"
+
+	svc_key := "pthomison.com/lb-svc"
+	svc_value := fmt.Sprintf("%s-%s", svc.Name, svc.Namespace)
+
+	labelMap[common_key] = common_val
+	labelMap[svc_key] = svc_value
+
+	selector, err := labels.Parse(fmt.Sprintf("%s==%s,%s==%s", common_key, common_val, svc_key, svc_value))
+	errcheck.Check(err)
+
+	return labelMap, selector
 }
 
 func lbServiceAccountName() string {

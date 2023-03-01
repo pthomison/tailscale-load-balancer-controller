@@ -15,6 +15,9 @@ const (
 // }
 
 func (lb *LoadBalancer) renderDeployment() {
+
+	selectorLabelsMap, _ := SelectorLabels(lb.svc)
+
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      deploymentName(lb.svc),
@@ -22,15 +25,11 @@ func (lb *LoadBalancer) renderDeployment() {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app.kubernetes.io/name": "tailscale-lb-provider",
-				},
+				MatchLabels: selectorLabelsMap,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app.kubernetes.io/name": "tailscale-lb-provider",
-					},
+					Labels: selectorLabelsMap,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: lbServiceAccountName(),
