@@ -4,7 +4,7 @@ CONTROLLER_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb-provider:$(TAG)
 # Image URL to use for deployment
 CONTROLLER_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-provider:$(TAG)
 
-TAILSCALE_LB_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb:$(TAG)
+TAILSCALE_LB_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb:latest
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25.0

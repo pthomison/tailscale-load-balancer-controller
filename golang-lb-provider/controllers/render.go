@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	tailscaleImage = "registry.localhost:15000/tailscale-lb:63bf45f"
+	tailscaleImage = "registry.localhost:15000/tailscale-lb:latest"
 )
 
 func (lb *LoadBalancer) renderDeployment() {
@@ -32,8 +32,9 @@ func (lb *LoadBalancer) renderDeployment() {
 					ServiceAccountName: lbServiceAccountName(),
 					Containers: []corev1.Container{
 						{
-							Name:  "tailscale",
-							Image: tailscaleImage,
+							Name:            "tailscale",
+							Image:           tailscaleImage,
+							ImagePullPolicy: corev1.PullAlways,
 							Env: []corev1.EnvVar{
 								{
 									Name: "TS_AUTHKEY",
@@ -70,8 +71,9 @@ func (lb *LoadBalancer) renderDeployment() {
 							}},
 						},
 						{
-							Name:  "ip-reflector",
-							Image: tailscaleImage,
+							Name:            "ip-reflector",
+							Image:           tailscaleImage,
+							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name:      "tailscale-socket",
 								MountPath: "/tmp",
