@@ -1,0 +1,85 @@
+package controllers
+
+import (
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+func (lb *LoadBalancer) renderDeployment() {
+	deployment := appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      deploymentName(lb.svc),
+			Namespace: defaultNamespace,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					ServiceAccountName: lbServiceAccountName(),
+					Containers: []corev1.Container{
+						{
+							Name:  "tailscale",
+							Image: "tailscale/tailscale:stable",
+							Env: []corev1.EnvVar{
+								{
+									Name: "TS_AUTHKEY",
+									ValueFrom: &corev1.EnvVarSource{
+										SecretKeyRef: &corev1.SecretKeySelector{
+											LocalObjectReference: corev1.LocalObjectReference{
+												Name: defaultSecret,
+											},
+											Key: defaultSecretKey,
+										},
+									},
+								},
+								{
+									Name:  "TS_KUBE_SECRET",
+									Value: lbKubeSecretName(lb.svc),
+								},
+								{
+									Name:  "TS_ACCEPT_DNS",
+									Value: "false",
+								},
+							},
+						},
+						{
+							Name:  "haproxy",
+							Image: "haproxy:2.7",
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "haproxy-config",
+								MountPath: "/usr/local/etc/haproxy",
+								ReadOnly:  true,
+							}},
+						},
+					},
+					Volumes: []corev1.Volume{{
+						Name: "haproxy-config",
+						VolumeSource: corev1.VolumeSource{
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: lbConfigMapName(lb.svc),
+								},
+							},
+						},
+					}},
+				},
+			},
+		},
+	}
+
+	lb.LoadBalancerObjects.Deployment = &deployment
+}
+
+func (lb *LoadBalancer) renderConfigMap() {
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      lbConfigMapName(lb.svc),
+			Namespace: defaultNamespace,
+		},
+		Data: map[string]string{
+			"haproxy.cfg": renderHaproxyConfig(lb.svc),
+		},
+	}
+
+	lb.LoadBalancerObjects.ConfigMap = configMap
+}

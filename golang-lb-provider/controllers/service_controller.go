@@ -20,9 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pthomison/errcheck"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -70,26 +68,33 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	fmt.Printf("Service: %v/%v/%v\n", svc.Spec.Type, svc.Name, svc.Namespace)
 
-	var pod corev1.Pod
-	err = r.Get(ctx, types.NamespacedName{
-		Name:      lbPodName(&svc),
-		Namespace: defaultNamespace,
-	}, &pod)
-	if client.IgnoreNotFound(err) != nil {
-		// requeue in hopes that the error is transient
-		return ctrl.Result{}, err
-	} else if err == nil {
-		// pod already deployed, ignore
-		return ctrl.Result{}, nil
+	lb := LoadBalancer{
+		svc: &svc,
 	}
 
-	lbPod, cm := NewLB(&svc)
+	lb.Render()
+	lb.Inject(r, ctx)
 
-	err = r.Update(ctx, cm)
-	errcheck.Check(err)
+	// var pod corev1.Pod
+	// err = r.Get(ctx, types.NamespacedName{
+	// 	Name:      lbPodName(&svc),
+	// 	Namespace: defaultNamespace,
+	// }, &pod)
+	// if client.IgnoreNotFound(err) != nil {
+	// 	// requeue in hopes that the error is transient
+	// 	return ctrl.Result{}, err
+	// } else if err == nil {
+	// 	// pod already deployed, ignore
+	// 	return ctrl.Result{}, nil
+	// }
 
-	err = r.Update(ctx, lbPod)
-	errcheck.Check(err)
+	// lbPod, cm := NewLB(&svc)
+
+	// err = r.Update(ctx, cm)
+	// errcheck.Check(err)
+
+	// err = r.Update(ctx, lbPod)
+	// errcheck.Check(err)
 
 	return ctrl.Result{}, nil
 }
