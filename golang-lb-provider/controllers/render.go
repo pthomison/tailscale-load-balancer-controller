@@ -51,6 +51,10 @@ func (lb *LoadBalancer) renderDeployment() {
 									Value: "false",
 								},
 							},
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "tailscale-socket",
+								MountPath: "/tmp",
+							}},
 						},
 						{
 							Name:  "haproxy",
