@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 
-	"github.com/pthomison/errcheck"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -25,12 +24,18 @@ func (lb *LoadBalancer) Render() {
 	lb.renderConfigMap()
 }
 
-func (lb *LoadBalancer) Inject(r *ServiceReconciler, ctx context.Context) {
+func (lb *LoadBalancer) Inject(r *ServiceReconciler, ctx context.Context) error {
 	err := lb.ensureConfigMap(r, ctx)
-	errcheck.Check(err)
+	if err != nil {
+		return err
+	}
 
 	err = lb.ensureDeployment(r, ctx)
-	errcheck.Check(err)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (lb *LoadBalancer) ensureConfigMap(r *ServiceReconciler, ctx context.Context) error {

@@ -74,28 +74,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	lb.Render()
-	lb.Inject(r, ctx)
-
-	// var pod corev1.Pod
-	// err = r.Get(ctx, types.NamespacedName{
-	// 	Name:      lbPodName(&svc),
-	// 	Namespace: defaultNamespace,
-	// }, &pod)
-	// if client.IgnoreNotFound(err) != nil {
-	// 	// requeue in hopes that the error is transient
-	// 	return ctrl.Result{}, err
-	// } else if err == nil {
-	// 	// pod already deployed, ignore
-	// 	return ctrl.Result{}, nil
-	// }
-
-	// lbPod, cm := NewLB(&svc)
-
-	// err = r.Update(ctx, cm)
-	// errcheck.Check(err)
-
-	// err = r.Update(ctx, lbPod)
-	// errcheck.Check(err)
+	err = lb.Inject(r, ctx)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

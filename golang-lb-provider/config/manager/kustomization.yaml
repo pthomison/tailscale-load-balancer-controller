@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: registry.localhost:15000/tailscale-lb-provider
-  newTag: 56b46a0
+  newTag: a0d6da3
