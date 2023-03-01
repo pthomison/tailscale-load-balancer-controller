@@ -19,6 +19,7 @@ do
     if [[ \"\$IP\" != \"\" ]];
     then
         echo "Update IP: \${IP}"
+        kubectl annotate pod \$HOSTNAME \"pthomison.com/tailscale-ip=\${IP}\"
     fi
 
     sleep 1
