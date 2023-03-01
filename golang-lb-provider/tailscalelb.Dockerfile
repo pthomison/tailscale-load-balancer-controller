@@ -9,7 +9,7 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 EOF
 
-COPY  <<COPYEOF /ip-monitor-entrypoint.sh
+COPY <<COPYEOF /ip-monitor-entrypoint.sh
 #!/usr/bin/env bash
 
 while true
@@ -20,6 +20,6 @@ do
 done
 COPYEOF
 
-RUN chmod +x /ip-monitor-entrypoint.shs
+RUN chmod +x /ip-monitor-entrypoint.sh
 
 # ENTRYPOINT [ "/entrypoint.sh" ]
