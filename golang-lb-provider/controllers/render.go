@@ -65,6 +65,19 @@ func (lb *LoadBalancer) renderDeployment() {
 								ReadOnly:  true,
 							}},
 						},
+						{
+							Name:  "ip-reflector",
+							Image: "tailscale/tailscale:stable",
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "tailscale-socket",
+								MountPath: "/tmp",
+							}},
+							Command: []string{
+								"/bin/sh",
+								"-c",
+								"sleep 9999",
+							},
+						},
 					},
 					Volumes: []corev1.Volume{
 						{
