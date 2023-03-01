@@ -85,26 +85,26 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	for {
 		_, selector := SelectorLabels(lb.svc)
 
-		for len(lbPodList.Items) == 0 {
-			err = r.List(ctx, &lbPodList, &client.ListOptions{
-				LabelSelector: client.MatchingLabelsSelector{
-					Selector: selector,
-				},
-			})
-			errcheck.Check(err)
+		err = r.List(ctx, &lbPodList, &client.ListOptions{
+			LabelSelector: client.MatchingLabelsSelector{
+				Selector: selector,
+			},
+		})
+		errcheck.Check(err)
 
-			time.Sleep(1 * time.Second)
+		if len(lbPodList.Items) != 0 {
+			pod := lbPodList.Items[0]
+			// fmt.Println(pod.Annotations)
+
+			if pod.Annotations["pthomison.com/tailscale-ip"] != "" {
+				fmt.Println(pod.Annotations["pthomison.com/tailscale-ip"])
+				break
+			}
 		}
-
-		pod := lbPodList.Items[0]
-
-		fmt.Println(pod.Annotations)
-
-		break
-
+		time.Sleep(1 * time.Second)
 	}
 
-	fmt.Printf("%v\n", lbPodList.Items)
+	// fmt.Printf("%v\n", lbPodList.Items)
 
 	return ctrl.Result{}, nil
 }
