@@ -45,6 +45,7 @@ type ServiceReconciler struct {
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;update;delete;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;create;update;delete
+//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
