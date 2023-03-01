@@ -13,7 +13,17 @@ func (lb *LoadBalancer) renderDeployment() {
 			Namespace: defaultNamespace,
 		},
 		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app.kubernetes.io/name": "tailscale-lb-provider",
+				},
+			},
 			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app.kubernetes.io/name": "tailscale-lb-provider",
+					},
+				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: lbServiceAccountName(),
 					Containers: []corev1.Container{
