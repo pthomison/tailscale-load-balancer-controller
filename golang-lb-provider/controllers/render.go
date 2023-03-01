@@ -62,16 +62,24 @@ func (lb *LoadBalancer) renderDeployment() {
 							}},
 						},
 					},
-					Volumes: []corev1.Volume{{
-						Name: "haproxy-config",
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: lbConfigMapName(lb.svc),
+					Volumes: []corev1.Volume{
+						{
+							Name: "haproxy-config",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: lbConfigMapName(lb.svc),
+									},
 								},
 							},
 						},
-					}},
+						{
+							Name: "tailscale-socket",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
+					},
 				},
 			},
 		},
