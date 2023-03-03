@@ -10,7 +10,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0 # important parameter
 
@@ -19,17 +19,12 @@ jobs:
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-    - name: Adding helm repo
-      run: |
-        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-        helm repo update
-
     - name: Install Helm
-      uses: azure/setup-helm@v1
+      uses: azure/setup-helm@v3
       with:
-        version: v3.8.1
+        version: v3.11.1
 
     - name: Run chart-releaser
-      uses: helm/chart-releaser-action@v1.4.0
+      uses: helm/chart-releaser-action@v1.5.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

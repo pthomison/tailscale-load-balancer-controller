@@ -1,8 +1,8 @@
 TAG ?= $(shell git rev-parse --short HEAD)
 # Image URL to use all building/pushing image targets
-CONTROLLER_BUILD_IMG ?= pthomison/tailscale-lb-provider:$(TAG)
+CONTROLLER_BUILD_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 # Image URL to use for deployment
-CONTROLLER_DEPLOY_IMG ?= pthomison/tailscale-lb-provider:$(TAG)
+CONTROLLER_DEPLOY_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 
 TAILSCALE_LB_BUILD_IMG ?= pthomison/tailscale-lb:latest
 
