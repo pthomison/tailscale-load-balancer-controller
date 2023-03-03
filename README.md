@@ -27,7 +27,8 @@ tbd
 - better helm chart
 - GH actions work, make sure image & chart publishing is working
 - Better "ip-updater" solution/loop
-- 
+- Configurable userspace vs kernel wireguard
+- Stop having trash commit messages on main
 
 
 ## How it works
