@@ -9,37 +9,45 @@ import (
 	"github.com/pthomison/errcheck"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func deploymentName(svc *corev1.Service) string {
-	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
+func tlbNamespace() string {
+	return "tailscale"
 }
 
-func lbConfigMapName(svc *corev1.Service) string {
-	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
+func tlbDeploymentName(req *ctrl.Request) (string, string, types.NamespacedName) {
+	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
+	namespace := tlbNamespace()
+	namespacedName := types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	return name, namespace, namespacedName
 }
 
-func lbKubeSecretName(svc *corev1.Service) string {
-	return fmt.Sprintf("tailscale-lb-%s", svc.Name)
+func tlbConfigMapName(req *ctrl.Request) (string, string, types.NamespacedName) {
+	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
+	namespace := tlbNamespace()
+	namespacedName := types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}
+
+	return name, namespace, namespacedName
 }
 
-func SelectorLabels(svc *corev1.Service) (map[string]string, labels.Selector) {
+func tlbKubeSecretName(req *ctrl.Request) (string, string, types.NamespacedName) {
+	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
+	namespace := tlbNamespace()
+	namespacedName := types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}
 
-	labelMap := make(map[string]string)
-
-	common_key := "app.kubernetes.io/name"
-	common_val := "tailscale-lb-provider"
-
-	svc_key := "pthomison.com/lb-svc"
-	svc_value := fmt.Sprintf("%s-%s", svc.Name, svc.Namespace)
-
-	labelMap[common_key] = common_val
-	labelMap[svc_key] = svc_value
-
-	selector, err := labels.Parse(fmt.Sprintf("%s==%s,%s==%s", common_key, common_val, svc_key, svc_value))
-	errcheck.Check(err)
-
-	return labelMap, selector
+	return name, namespace, namespacedName
 }
 
 func lbServiceAccountName() string {
@@ -53,6 +61,20 @@ func lbServiceAccountName() string {
 	return name
 }
 
+func SelectorLabels(svcName string, svcNamespace string) (map[string]string, labels.Selector) {
+
+	labelMap := make(map[string]string)
+
+	labelMap[commonLabel] = commonLabelVal
+	labelMap[serviceNameLabel] = svcName
+	labelMap[serviceNamespaceLabel] = svcNamespace
+
+	selector, err := labels.Parse(fmt.Sprintf("%s==%s,%s==%s,%s==%s", commonLabel, commonLabelVal, serviceNameLabel, svcName, serviceNamespaceLabel, svcNamespace))
+	errcheck.Check(err)
+
+	return labelMap, selector
+}
+
 func tailscaleImage() string {
 
 	image_tag := os.Getenv("TLB_IMAGE_TAG")
@@ -61,8 +83,8 @@ func tailscaleImage() string {
 		image_tag = "latest"
 	}
 
-	return fmt.Sprintf("pthomison/tailscale-lb:%s", image_tag)
-	// return fmt.Sprintf("registry.localhost:15000/tailscale-lb:%s", image_tag)
+	// return fmt.Sprintf("pthomison/tailscale-lb:%s", image_tag)
+	return fmt.Sprintf("registry.localhost:15000/tailscale-lb:%s", image_tag)
 }
 
 func renderHaproxyConfig(svc *corev1.Service) string {

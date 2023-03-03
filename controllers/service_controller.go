@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pthomison/errcheck"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,7 +30,17 @@ import (
 )
 
 var (
-	defaultNamespace = "tailscale"
+	startup = true
+)
+
+const (
+	annotationBase = "operator.pthomison.com"
+
+	serviceNameLabel      = "operator.pthomison.com/service-name-ref"
+	serviceNamespaceLabel = "operator.pthomison.com/service-namespace-ref"
+	commonLabel           = "app.kubernetes.io/name"
+	commonLabelVal        = "tailscale-lb-provider"
+
 	defaultSecret    = "tailscale-token"
 	defaultSecretKey = "token"
 )
@@ -52,52 +61,86 @@ type ServiceReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
+	var err error
+
+	if startup {
+		err = CheckForOrphanedDeplyments(r, ctx)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		startup = false
+	}
+
+	fmt.Println(req)
 
 	// Request the service
-	var svc corev1.Service
-	err := r.Get(ctx, req.NamespacedName, &svc)
-	if client.IgnoreNotFound(err) != nil {
-		// requeue in hopes that the error is transient
+	exists, svc, err := r.GetService(ctx, req.Name, req.Namespace)
+	if err != nil {
 		return ctrl.Result{}, err
-	} else if err != nil {
-		fmt.Println(req)
-		return ctrl.Result{}, nil
 	}
 
-	if svc.Spec.Type != "LoadBalancer" {
-		// non LB service, ignore
-		return ctrl.Result{}, nil
+	if exists {
+
+		if svc.Spec.Type != "LoadBalancer" {
+			// non LB service, ignore
+			return ctrl.Result{}, nil
+		}
+
+		err = r.EnsureLoadBalancer(ctx, svc, req)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	} else {
+		err = r.DestroyLoadBalancer(ctx, req)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
+	return ctrl.Result{}, nil
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&corev1.Service{}).
+		Complete(r)
+}
+
+func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.Service, req ctrl.Request) error {
 	fmt.Printf("Service: %v/%v/%v\n", svc.Spec.Type, svc.Name, svc.Namespace)
 
 	lb := LoadBalancer{
-		svc: &svc,
+		req: &req,
+		svc: svc,
 	}
 
 	lb.Render()
-	err = lb.Inject(r, ctx)
+	err := lb.Inject(r, ctx)
 	if err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
 	var lbPodList corev1.PodList
 	var loadbalancerIP string
 	for {
-		_, selector := SelectorLabels(lb.svc)
+		_, selector := SelectorLabels(lb.req.Name, lb.req.Namespace)
 
 		err = r.List(ctx, &lbPodList, &client.ListOptions{
 			LabelSelector: client.MatchingLabelsSelector{
 				Selector: selector,
 			},
 		})
-		errcheck.Check(err)
+		if err != nil {
+			return err
+		}
 
 		if len(lbPodList.Items) != 0 {
 			pod := lbPodList.Items[0]
 
-			if pod.Annotations["pthomison.com/tailscale-ip"] != "" {
-				loadbalancerIP = pod.Annotations["pthomison.com/tailscale-ip"]
+			annotation := fmt.Sprintf("%s/tailscale-ip", annotationBase)
+			if pod.Annotations[annotation] != "" {
+				loadbalancerIP = pod.Annotations[annotation]
 				break
 			}
 		}
@@ -108,14 +151,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	lb.svc.Spec.ExternalIPs = []string{loadbalancerIP}
 
 	err = r.Update(ctx, lb.svc)
-	errcheck.Check(err)
+	if err != nil {
+		return err
+	}
 
-	return ctrl.Result{}, nil
+	return nil
 }
 
-// SetupWithManager sets up the controller with the Manager.
-func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&corev1.Service{}).
-		Complete(r)
+func (r *ServiceReconciler) DestroyLoadBalancer(ctx context.Context, req ctrl.Request) error {
+	return Delete(r, ctx, &req)
 }

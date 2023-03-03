@@ -6,22 +6,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// const (
-// 	tailscaleImage = "pthomison/tailscale-lb:latest"
-// )
-
-// func tailscaleLBImage() string {
-
-// }
-
 func (lb *LoadBalancer) renderDeployment() {
 
-	selectorLabelsMap, _ := SelectorLabels(lb.svc)
+	cfName, _, _ := tlbConfigMapName(lb.req)
+	tsKubeSecretName, _, _ := tlbKubeSecretName(lb.req)
+
+	deploymentName, deploymentNamespace, _ := tlbDeploymentName(lb.req)
+
+	selectorLabelsMap, _ := SelectorLabels(lb.req.Name, lb.req.Namespace)
 
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      deploymentName(lb.svc),
-			Namespace: defaultNamespace,
+			Name:      deploymentName,
+			Namespace: deploymentNamespace,
+			Labels:    selectorLabelsMap,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
@@ -52,7 +50,7 @@ func (lb *LoadBalancer) renderDeployment() {
 								},
 								{
 									Name:  "TS_KUBE_SECRET",
-									Value: lbKubeSecretName(lb.svc),
+									Value: tsKubeSecretName,
 								},
 								{
 									Name:  "TS_ACCEPT_DNS",
@@ -92,7 +90,7 @@ func (lb *LoadBalancer) renderDeployment() {
 							VolumeSource: corev1.VolumeSource{
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
-										Name: lbConfigMapName(lb.svc),
+										Name: cfName,
 									},
 								},
 							},
@@ -113,10 +111,15 @@ func (lb *LoadBalancer) renderDeployment() {
 }
 
 func (lb *LoadBalancer) renderConfigMap() {
+	name, namespace, _ := tlbConfigMapName(lb.req)
+
+	selectorLabelsMap, _ := SelectorLabels(lb.req.Name, lb.req.Namespace)
+
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      lbConfigMapName(lb.svc),
-			Namespace: defaultNamespace,
+			Name:      name,
+			Namespace: namespace,
+			Labels:    selectorLabelsMap,
 		},
 		Data: map[string]string{
 			"haproxy.cfg": renderHaproxyConfig(lb.svc),
