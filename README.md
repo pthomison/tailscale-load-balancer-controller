@@ -29,7 +29,7 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 
 ## ToDo
 
-- stop using "latest" for the deployed LB pod
+- ~~stop using "latest" for the deployed LB pod~~
 - better helm chart
 - GH actions work, make sure image & chart publishing is working
 - Better "ip-updater" solution/loop
@@ -37,6 +37,8 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 - Stop having trash commit messages on main
 - Scope down service account permissions
 - Seperate service account for lb pods
+- Garbage Collection of lb pods
+- Easy way to toggle the use of dev images vs dockerhub
 
 
 ## How it works

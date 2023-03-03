@@ -6,9 +6,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	tailscaleImage = "pthomison/tailscale-lb:latest"
-)
+// const (
+// 	tailscaleImage = "pthomison/tailscale-lb:latest"
+// )
 
 // func tailscaleLBImage() string {
 
@@ -36,7 +36,7 @@ func (lb *LoadBalancer) renderDeployment() {
 					Containers: []corev1.Container{
 						{
 							Name:            "tailscale",
-							Image:           tailscaleImage,
+							Image:           tailscaleImage(),
 							ImagePullPolicy: corev1.PullAlways,
 							Env: []corev1.EnvVar{
 								{
@@ -75,7 +75,7 @@ func (lb *LoadBalancer) renderDeployment() {
 						},
 						{
 							Name:            "ip-reflector",
-							Image:           tailscaleImage,
+							Image:           tailscaleImage(),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name:      "tailscale-socket",

@@ -72,6 +72,12 @@ spec:
         - --leader-elect
         image: controller:latest
         name: manager
+        env:
+        - name: TLB_IMAGE_TAG
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['pthomison.com/image-tag']
+
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

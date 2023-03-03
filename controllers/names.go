@@ -53,6 +53,18 @@ func lbServiceAccountName() string {
 	return name
 }
 
+func tailscaleImage() string {
+
+	image_tag := os.Getenv("TLB_IMAGE_TAG")
+
+	if image_tag == "" {
+		image_tag = "latest"
+	}
+
+	return fmt.Sprintf("pthomison/tailscale-lb:%s", image_tag)
+	// return fmt.Sprintf("registry.localhost:15000/tailscale-lb:%s", image_tag)
+}
+
 func renderHaproxyConfig(svc *corev1.Service) string {
 	haproxy_template := `
 # Global parameters

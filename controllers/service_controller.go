@@ -60,7 +60,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		// requeue in hopes that the error is transient
 		return ctrl.Result{}, err
 	} else if err != nil {
-		// if object has been deleted, ignore
+		fmt.Println(req)
 		return ctrl.Result{}, nil
 	}
 
@@ -95,7 +95,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 		if len(lbPodList.Items) != 0 {
 			pod := lbPodList.Items[0]
-			// fmt.Println(pod.Annotations)
 
 			if pod.Annotations["pthomison.com/tailscale-ip"] != "" {
 				loadbalancerIP = pod.Annotations["pthomison.com/tailscale-ip"]
@@ -110,8 +109,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	err = r.Update(ctx, lb.svc)
 	errcheck.Check(err)
-
-	// fmt.Printf("%v\n", lbPodList.Items)
 
 	return ctrl.Result{}, nil
 }
