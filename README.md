@@ -6,6 +6,10 @@ For every service of type `LoadBalancer`, the controller will launch a tailscale
 
 ## Getting Started
 
+Requirements (hard codes that need to be broken out at somepoint):
+- a namespace with the name `tailscale`
+- a secret in that namespace with the name `tailscale-token` with a key of `token` that holds an tailscale auth key (preferably ephemeral)
+
 Deployment Options:
 - `make deploy` will use kustomize to template the artifacts into your cluster
 - `make template > your-spot-for-config.yaml` will just template out the artifacts, allowing you to place them whereever fits into your deployment pipeline
@@ -18,7 +22,9 @@ Currently there is a helm chart, but its relatively unconfigurable as its just `
 To Use:
 
 ```sh
-tbd
+helm repo add tailscale-load-balancer-controller https://pthomison.github.io/tailscale-load-balancer-controller
+helm repo update
+helm install tailscale-load-balancer-controller tailscale-load-balancer-controller/tailscale-load-balancer-controller
 ```
 
 ## ToDo
@@ -29,6 +35,8 @@ tbd
 - Better "ip-updater" solution/loop
 - Configurable userspace vs kernel wireguard
 - Stop having trash commit messages on main
+- Scope down service account permissions
+- Seperate service account for lb pods
 
 
 ## How it works
