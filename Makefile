@@ -5,6 +5,7 @@ CONTROLLER_BUILD_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 CONTROLLER_DEPLOY_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 
 TAILSCALE_LB_BUILD_IMG ?= pthomison/tailscale-lb:latest
+TAILSCALE_LB_DEPLOY_IMG ?= pthomison/tailscale-lb:latest
 
 LOCAL_CONTROLLER_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb-controller:$(TAG)
 LOCAL_CONTROLLER_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-controller:$(TAG)
@@ -149,12 +150,14 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 
 .PHONY: template
 template: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} && $(KUSTOMIZE) edit set annotation "pthomison.com/image-tag:${TAG}"
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} \
+		&& $(KUSTOMIZE) edit set annotation "pthomison.com/tlb-image:${TAILSCALE_LB_DEPLOY_IMG}"
 	$(KUSTOMIZE) build config/default 
 
 .PHONY: helm-chart-template
 helm-chart-template: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} && $(KUSTOMIZE) edit set annotation "pthomison.com/image-tag:${TAG}"
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} \
+		&& $(KUSTOMIZE) edit set annotation "pthomison.com/tlb-image:${TAILSCALE_LB_DEPLOY_IMG}"
 	$(KUSTOMIZE) build config/default > ./charts/tailscale-load-balancer-controller/templates/raw.yaml
 
 .PHONY: undeploy
