@@ -4,8 +4,8 @@ CONTROLLER_BUILD_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 # Image URL to use for deployment
 CONTROLLER_DEPLOY_IMG ?= pthomison/tailscale-lb-controller:$(TAG)
 
-TAILSCALE_LB_BUILD_IMG ?= pthomison/tailscale-lb:latest
-TAILSCALE_LB_DEPLOY_IMG ?= pthomison/tailscale-lb:latest
+TAILSCALE_LB_BUILD_IMG ?= pthomison/tailscale-lb:$(TAG)
+TAILSCALE_LB_DEPLOY_IMG ?= pthomison/tailscale-lb:$(TAG)
 
 LOCAL_CONTROLLER_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb-controller:$(TAG)
 LOCAL_CONTROLLER_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-controller:$(TAG)
