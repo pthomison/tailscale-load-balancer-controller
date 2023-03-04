@@ -244,6 +244,20 @@ entries:
   tailscale-load-balancer-controller:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2023-03-04T20:53:42.996668994Z"
+    digest: 8762ba9684d2084adadc619838eb05eeb7910dc7d71fe87e2a614b508808899f
+    maintainers:
+    - email: tbd@tbd.com
+      name: Patrick Thomison
+    name: tailscale-load-balancer-controller
+    sources:
+    - https://github.com/pthomison/tailscale-load-balancer-controller
+    type: application
+    urls:
+    - https://github.com/pthomison/tailscale-load-balancer-controller/releases/download/tailscale-load-balancer-controller-0.0.3/tailscale-load-balancer-controller-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2023-03-04T20:45:41.434763394Z"
     digest: 3536073b58d3dbe4930021c6c5062aaadf6e5e80c7552a87bd2a17170bb704ca
     maintainers:
@@ -328,4 +342,4 @@ entries:
     urls:
     - https://github.com/pthomison/tailscale-ingress-controller/releases/download/tailscale-loadbalancer-provider-0.0.1/tailscale-loadbalancer-provider-0.0.1.tgz
     version: 0.0.1
-generated: "2023-03-04T20:45:41.434876093Z"
+generated: "2023-03-04T20:53:42.996784096Z"
