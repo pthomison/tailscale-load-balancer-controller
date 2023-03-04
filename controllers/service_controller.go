@@ -31,26 +31,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-var (
-	startup = true
-)
-
-const (
-	annotationBase = "operator.pthomison.com"
-
-	serviceNameLabel      = "operator.pthomison.com/service-name-ref"
-	serviceNamespaceLabel = "operator.pthomison.com/service-namespace-ref"
-	commonLabel           = "app.kubernetes.io/name"
-	commonLabelVal        = "tailscale-lb-provider"
-
-	defaultSecret    = "tailscale-token"
-	defaultSecretKey = "token"
-)
+// var (
+// 	startup = true
+// )
 
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme  *runtime.Scheme
+	StartUp bool
 }
 
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;update;patch
@@ -65,16 +54,16 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	_ = log.FromContext(ctx)
 	var err error
 
-	if startup {
+	if r.StartUp {
 		err = CheckForOrphanedDeplyments(r, ctx)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		startup = false
+		r.StartUp = false
 	}
 
 	// Request the service
-	exists, svc, err := r.GetService(ctx, req.Name, req.Namespace)
+	exists, svc, err := r.getService(ctx, req.Name, req.Namespace)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -138,7 +127,7 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 		if len(lbPodList.Items) != 0 {
 			pod := lbPodList.Items[0]
 
-			annotation := fmt.Sprintf("%s/tailscale-ip", annotationBase)
+			annotation := fmt.Sprintf("%s/tailscale-ip", names.AnnotationBase)
 			if pod.Annotations[annotation] != "" {
 				loadbalancerIP = pod.Annotations[annotation]
 				break

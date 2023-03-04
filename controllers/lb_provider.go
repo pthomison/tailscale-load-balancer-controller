@@ -7,30 +7,18 @@ import (
 	"github.com/pthomison/tailscale-load-balancer-controller/controllers/lb"
 	"github.com/pthomison/tailscale-load-balancer-controller/controllers/names"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// type LoadBalancer struct {
-// 	req *ctrl.Request
-// 	svc *corev1.Service
-// 	LoadBalancerObjects
-// }
-
-// type LoadBalancerObjects struct {
-// 	Deployment *appsv1.Deployment
-// 	ConfigMap  *corev1.ConfigMap
-// }
-
 func (r *ServiceReconciler) Inject(ctx context.Context, LB *lb.LoadBalancer) error {
-	err := r.ensureConfigMap(ctx, LB)
+	err := r.ensureConfigMap(ctx, LB.ConfigMap)
 	if err != nil {
 		return err
 	}
 
-	err = r.ensureDeployment(ctx, LB)
+	err = r.ensureDeployment(ctx, LB.Deployment)
 	if err != nil {
 		return err
 	}
@@ -39,93 +27,19 @@ func (r *ServiceReconciler) Inject(ctx context.Context, LB *lb.LoadBalancer) err
 }
 
 func Delete(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	err := deleteDeployment(r, ctx, req)
+	_, _, dpNamespacedName := names.TLBDeploymentName(req)
+	err := r.deleteDeployment(ctx, dpNamespacedName)
 	if err != nil {
 		return err
 	}
 
-	err = deleteConfigMap(r, ctx, req)
+	_, _, cmNamespacedName := names.TLBConfigMapName(req)
+	err = r.deleteConfigMap(ctx, cmNamespacedName)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func deleteConfigMap(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	_, _, namespacedName := names.TLBConfigMapName(req)
-
-	var tmp corev1.ConfigMap
-	err := r.Get(ctx, namespacedName, &tmp)
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	} else if err != nil {
-		// Object Already Deleted
-	} else {
-		err = r.Delete(ctx, &tmp)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func deleteDeployment(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	_, _, namespacedName := names.TLBDeploymentName(req)
-
-	var tmp appsv1.Deployment
-	err := r.Get(ctx, namespacedName, &tmp)
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	} else if err != nil {
-		// Object Already Deleted
-	} else {
-		err = r.Delete(ctx, &tmp)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *ServiceReconciler) ensureConfigMap(ctx context.Context, LB *lb.LoadBalancer) error {
-
-	name := types.NamespacedName{
-		Name:      LB.Deployment.ObjectMeta.Name,
-		Namespace: LB.Deployment.ObjectMeta.Namespace,
-	}
-
-	var tmp corev1.ConfigMap
-	err := r.Get(ctx, name, &tmp)
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	} else if err != nil {
-		err = r.Create(ctx, LB.ConfigMap)
-	} else {
-		err = r.Update(ctx, LB.ConfigMap)
-	}
-	return err
-}
-
-func (r *ServiceReconciler) ensureDeployment(ctx context.Context, LB *lb.LoadBalancer) error {
-
-	name := types.NamespacedName{
-		Name:      LB.Deployment.ObjectMeta.Name,
-		Namespace: LB.Deployment.ObjectMeta.Namespace,
-	}
-
-	var tmp appsv1.Deployment
-	err := r.Get(ctx, name, &tmp)
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	} else if err != nil {
-		err = r.Create(ctx, LB.Deployment)
-	} else {
-		err = r.Update(ctx, LB.Deployment)
-	}
-	return err
 }
 
 func CheckForOrphanedDeplyments(r *ServiceReconciler, ctx context.Context) error {
@@ -135,19 +49,19 @@ func CheckForOrphanedDeplyments(r *ServiceReconciler, ctx context.Context) error
 
 	var deploymentList appsv1.DeploymentList
 	err := r.List(ctx, &deploymentList, client.InNamespace(ns), client.MatchingLabels{
-		commonLabel: commonLabelVal,
+		names.CommonLabel: names.CommonLabelVal,
 	})
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	}
 
 	for _, deployment := range deploymentList.Items {
-		svcName := deployment.Labels[serviceNameLabel]
-		svcNamespace := deployment.Labels[serviceNamespaceLabel]
+		svcName := deployment.Labels[names.ServiceNameLabel]
+		svcNamespace := deployment.Labels[names.ServiceNamespaceLabel]
 
 		fmt.Printf("Existing LB Detected: %s/%s\n", svcName, svcNamespace)
 
-		exists, _, err := r.GetService(ctx, svcName, svcNamespace)
+		exists, _, err := r.getService(ctx, svcName, svcNamespace)
 		if err != nil {
 			return err
 		}

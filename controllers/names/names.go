@@ -63,11 +63,11 @@ func SelectorLabels(svcName string, svcNamespace string) (map[string]string, lab
 
 	labelMap := make(map[string]string)
 
-	labelMap[commonLabel] = commonLabelVal
-	labelMap[serviceNameLabel] = svcName
-	labelMap[serviceNamespaceLabel] = svcNamespace
+	labelMap[CommonLabel] = CommonLabelVal
+	labelMap[ServiceNameLabel] = svcName
+	labelMap[ServiceNamespaceLabel] = svcNamespace
 
-	selector, err := labels.Parse(fmt.Sprintf("%s==%s,%s==%s,%s==%s", commonLabel, commonLabelVal, serviceNameLabel, svcName, serviceNamespaceLabel, svcNamespace))
+	selector, err := labels.Parse(fmt.Sprintf("%s==%s,%s==%s,%s==%s", CommonLabel, CommonLabelVal, ServiceNameLabel, svcName, ServiceNamespaceLabel, svcNamespace))
 	errcheck.Check(err)
 
 	return labelMap, selector

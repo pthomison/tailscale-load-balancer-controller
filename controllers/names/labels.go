@@ -1,12 +1,12 @@
 package names
 
 const (
-	annotationBase = "operator.pthomison.com"
+	AnnotationBase = "operator.pthomison.com"
 
-	serviceNameLabel      = "operator.pthomison.com/service-name-ref"
-	serviceNamespaceLabel = "operator.pthomison.com/service-namespace-ref"
-	commonLabel           = "app.kubernetes.io/name"
-	commonLabelVal        = "tailscale-lb-provider"
+	ServiceNameLabel      = "operator.pthomison.com/service-name-ref"
+	ServiceNamespaceLabel = "operator.pthomison.com/service-namespace-ref"
+	CommonLabel           = "app.kubernetes.io/name"
+	CommonLabelVal        = "tailscale-lb-provider"
 
 	DefaultSecret    = "tailscale-token"
 	DefaultSecretKey = "token"
