@@ -150,6 +150,11 @@ template: manifests kustomize ## Deploy controller to the K8s cluster specified 
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} && $(KUSTOMIZE) edit set annotation "pthomison.com/image-tag:${TAG}"
 	$(KUSTOMIZE) build config/default 
 
+.PHONY: helm-chart-template
+helm-chart-template: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${CONTROLLER_DEPLOY_IMG} && $(KUSTOMIZE) edit set annotation "pthomison.com/image-tag:${TAG}"
+	$(KUSTOMIZE) build config/default > ./charts/tailscale-load-balancer-controller/templates/raw.yaml
+
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -

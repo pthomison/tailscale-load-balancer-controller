@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/name: role
     app.kubernetes.io/instance: leader-election-role
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: golang-lb-provider
-    app.kubernetes.io/part-of: golang-lb-provider
+    app.kubernetes.io/created-by: tailscale-load-balancer-controller
+    app.kubernetes.io/part-of: tailscale-load-balancer-controller
     app.kubernetes.io/managed-by: kustomize
   name: leader-election-role
 rules:
