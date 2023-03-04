@@ -73,11 +73,10 @@ spec:
         image: controller:latest
         name: manager
         env:
-        - name: TLB_IMAGE_TAG
+        - name: TLB_IMAGE
           valueFrom:
             fieldRef:
-              fieldPath: metadata.annotations['pthomison.com/image-tag']
-
+              fieldPath: metadata.annotations['pthomison.com/tlb-image']
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

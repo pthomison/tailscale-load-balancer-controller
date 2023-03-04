@@ -8,7 +8,8 @@ TAILSCALE_LB_BUILD_IMG ?= pthomison/tailscale-lb:latest
 
 LOCAL_CONTROLLER_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb-controller:$(TAG)
 LOCAL_CONTROLLER_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb-controller:$(TAG)
-LOCAL_TAILSCALE_LB_IMG ?= 127.0.0.1:15000/tailscale-lb:$(TAG)
+LOCAL_TAILSCALE_LB_BUILD_IMG ?= 127.0.0.1:15000/tailscale-lb:$(TAG)
+LOCAL_TAILSCALE_LB_DEPLOY_IMG ?= registry.localhost:15000/tailscale-lb:$(TAG)
 
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
@@ -41,12 +42,12 @@ all: build
 
 local-image-build-and-deploy:
 	IMG=$(LOCAL_CONTROLLER_BUILD_IMG) DOCKERFILE="./Dockerfile" $(MAKE) docker-build
-	IMG=$(LOCAL_TAILSCALE_LB_IMG) DOCKERFILE="./tailscalelb.Dockerfile" $(MAKE) docker-build
+	IMG=$(LOCAL_TAILSCALE_LB_BUILD_IMG) DOCKERFILE="./tailscalelb.Dockerfile" $(MAKE) docker-build
 
 	IMG=$(LOCAL_CONTROLLER_BUILD_IMG) $(MAKE) docker-push
-	IMG=$(LOCAL_TAILSCALE_LB_IMG) $(MAKE) docker-push
+	IMG=$(LOCAL_TAILSCALE_LB_BUILD_IMG) $(MAKE) docker-push
 
-	IMG=$(LOCAL_CONTROLLER_DEPLOY_IMG) $(MAKE) deploy
+	IMG=$(LOCAL_CONTROLLER_DEPLOY_IMG) TLB_IMG=$(LOCAL_TAILSCALE_LB_DEPLOY_IMG) $(MAKE) deploy
 
 
 ##@ General
@@ -142,7 +143,8 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG} && $(KUSTOMIZE) edit set annotation "pthomison.com/image-tag:${TAG}"
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG} \
+		&& $(KUSTOMIZE) edit set annotation "pthomison.com/tlb-image:${TLB_IMG}"
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 .PHONY: template
