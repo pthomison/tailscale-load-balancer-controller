@@ -77,7 +77,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['pthomison.com/image-tag']
-
+        - name: TLB_IMAGE_REPO
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['pthomison.com/image-repo']
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

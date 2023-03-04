@@ -4,7 +4,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: pthomison/tailscale-lb-controller
-  newTag: 3d5de07
+  newName: registry.localhost:15000/tailscale-lb-controller
+  newTag: 1b90a24
 commonAnnotations:
-  pthomison.com/image-tag: 3d5de07
+  pthomison.com/image-tag: 1b90a24
