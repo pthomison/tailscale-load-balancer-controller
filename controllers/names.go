@@ -77,16 +77,11 @@ func SelectorLabels(svcName string, svcNamespace string) (map[string]string, lab
 
 func tailscaleImage() string {
 
-	image_tag := os.Getenv("TLB_IMAGE_TAG")
-	if image_tag == "" {
-		image_tag = "latest"
+	image := os.Getenv("TLB_IMAGE")
+	if image == "" {
+		image = "registry.localhost:15000/tailscale-lb:latest"
 	}
-
-	image_repo := os.Getenv("TLB_IMAGE_REPO")
-	if image_repo == "" {
-		image_repo = "registry.localhost:15000/tailscale-lb"
-	}
-	return fmt.Sprintf("%s:%s", image_repo, image_tag)
+	return image
 }
 
 func renderHaproxyConfig(svc *corev1.Service) string {
