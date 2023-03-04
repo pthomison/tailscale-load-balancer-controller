@@ -1,8 +1,3 @@
-test -s /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/controller-gen || GOBIN=/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
-/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-test -s /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize || { curl -Ss "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 4.5.7 /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin; }
-cd config/manager && /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize edit set image controller=pthomison/tailscale-lb-controller:ef7c2da && /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize edit set annotation "pthomison.com/image-tag:ef7c2da"
-/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize build config/default 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
