@@ -1,3 +1,8 @@
+test -s /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/controller-gen || GOBIN=/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+test -s /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize || { curl -Ss "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- 4.5.7 /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin; }
+cd config/manager && /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize edit set image controller=pthomison/tailscale-lb-controller:ef7c2da && /Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize edit set annotation "pthomison.com/image-tag:ef7c2da"
+/Users/pthomison/Projects/kubernetes/operators/tailscale-load-balancer-controller/bin/kustomize build config/default 
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -8,7 +13,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: serviceaccount
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-controller-manager
+  name: tailscale-lb-controller-controller-manager
   namespace: tailscale
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -21,7 +26,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: role
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-leader-election-role
+  name: tailscale-lb-controller-leader-election-role
   namespace: tailscale
 rules:
 - apiGroups:
@@ -60,7 +65,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: tailscale-lb-provider-manager-role
+  name: tailscale-lb-controller-manager-role
 rules:
 - apiGroups:
   - ""
@@ -127,7 +132,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: clusterrole
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-metrics-reader
+  name: tailscale-lb-controller-metrics-reader
 rules:
 - nonResourceURLs:
   - /metrics
@@ -144,7 +149,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: clusterrole
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-proxy-role
+  name: tailscale-lb-controller-proxy-role
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -169,15 +174,15 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: rolebinding
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-leader-election-rolebinding
+  name: tailscale-lb-controller-leader-election-rolebinding
   namespace: tailscale
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: tailscale-lb-provider-leader-election-role
+  name: tailscale-lb-controller-leader-election-role
 subjects:
 - kind: ServiceAccount
-  name: tailscale-lb-provider-controller-manager
+  name: tailscale-lb-controller-controller-manager
   namespace: tailscale
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -190,14 +195,14 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: clusterrolebinding
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-manager-rolebinding
+  name: tailscale-lb-controller-manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tailscale-lb-provider-manager-role
+  name: tailscale-lb-controller-manager-role
 subjects:
 - kind: ServiceAccount
-  name: tailscale-lb-provider-controller-manager
+  name: tailscale-lb-controller-controller-manager
   namespace: tailscale
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -210,14 +215,14 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: clusterrolebinding
     app.kubernetes.io/part-of: golang-lb-provider
-  name: tailscale-lb-provider-proxy-rolebinding
+  name: tailscale-lb-controller-proxy-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tailscale-lb-provider-proxy-role
+  name: tailscale-lb-controller-proxy-role
 subjects:
 - kind: ServiceAccount
-  name: tailscale-lb-provider-controller-manager
+  name: tailscale-lb-controller-controller-manager
   namespace: tailscale
 ---
 apiVersion: v1
@@ -231,7 +236,7 @@ metadata:
     app.kubernetes.io/name: service
     app.kubernetes.io/part-of: golang-lb-provider
     control-plane: controller-manager
-  name: tailscale-lb-provider-controller-manager-metrics-service
+  name: tailscale-lb-controller-controller-manager-metrics-service
   namespace: tailscale
 spec:
   ports:
@@ -246,7 +251,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    pthomison.com/image-tag: 033166b
+    pthomison.com/image-tag: ef7c2da
   labels:
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: golang-lb-provider
@@ -255,7 +260,7 @@ metadata:
     app.kubernetes.io/name: deployment
     app.kubernetes.io/part-of: golang-lb-provider
     control-plane: controller-manager
-  name: tailscale-lb-provider-controller-manager
+  name: tailscale-lb-controller-controller-manager
   namespace: tailscale
 spec:
   replicas: 1
@@ -266,7 +271,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
-        pthomison.com/image-tag: 033166b
+        pthomison.com/image-tag: ef7c2da
       labels:
         control-plane: controller-manager
     spec:
@@ -299,7 +304,11 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: spec.serviceAccountName
-        image: pthomison/tailscale-lb-controller:033166b
+        - name: TLB_IMAGE_TAG
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['pthomison.com/image-tag']
+        image: pthomison/tailscale-lb-controller:ef7c2da
         livenessProbe:
           httpGet:
             path: /healthz
@@ -350,5 +359,5 @@ spec:
             - ALL
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: tailscale-lb-provider-controller-manager
+      serviceAccountName: tailscale-lb-controller-controller-manager
       terminationGracePeriodSeconds: 10

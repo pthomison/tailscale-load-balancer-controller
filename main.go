@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/pthomison/tailscale-loadbalancer-provider/controllers"
+	"github.com/pthomison/tailscale-loadbalancer-controller/controllers"
 	//+kubebuilder:scaffold:imports
 )
 

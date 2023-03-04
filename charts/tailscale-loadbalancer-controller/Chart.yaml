@@ -2,11 +2,11 @@
 apiVersion: v2
 type: application
 appVersion: "0.0.1"
-version: 0.0.2
-name: tailscale-loadbalancer-provider
+version: 0.0.1
+name: tailscale-loadbalancer-controller
 description: ""
 sources:
-  - https://github.com/pthomison/tailscale-ingress-controller
+  - https://github.com/pthomison/tailscale-loadbalancer-controller
   
 maintainers:
   - name: Patrick Thomison

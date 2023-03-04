@@ -1,4 +1,4 @@
-module github.com/pthomison/tailscale-loadbalancer-provider
+module github.com/pthomison/tailscale-loadbalancer-controller
 
 go 1.19
 
