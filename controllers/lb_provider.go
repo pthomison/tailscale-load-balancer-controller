@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pthomison/tailscale-load-balancer-controller/controllers/lb"
+	"github.com/pthomison/tailscale-load-balancer-controller/controllers/names"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -11,29 +13,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type LoadBalancer struct {
-	req *ctrl.Request
-	svc *corev1.Service
-	LoadBalancerObjects
-}
+// type LoadBalancer struct {
+// 	req *ctrl.Request
+// 	svc *corev1.Service
+// 	LoadBalancerObjects
+// }
 
-type LoadBalancerObjects struct {
-	Deployment *appsv1.Deployment
-	ConfigMap  *corev1.ConfigMap
-}
+// type LoadBalancerObjects struct {
+// 	Deployment *appsv1.Deployment
+// 	ConfigMap  *corev1.ConfigMap
+// }
 
-func (lb *LoadBalancer) Render() {
-	lb.renderDeployment()
-	lb.renderConfigMap()
-}
-
-func (lb *LoadBalancer) Inject(r *ServiceReconciler, ctx context.Context) error {
-	err := lb.ensureConfigMap(r, ctx)
+func (r *ServiceReconciler) Inject(ctx context.Context, LB *lb.LoadBalancer) error {
+	err := r.ensureConfigMap(ctx, LB)
 	if err != nil {
 		return err
 	}
 
-	err = lb.ensureDeployment(r, ctx)
+	err = r.ensureDeployment(ctx, LB)
 	if err != nil {
 		return err
 	}
@@ -56,7 +53,7 @@ func Delete(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error 
 }
 
 func deleteConfigMap(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	_, _, namespacedName := tlbConfigMapName(req)
+	_, _, namespacedName := names.TLBConfigMapName(req)
 
 	var tmp corev1.ConfigMap
 	err := r.Get(ctx, namespacedName, &tmp)
@@ -75,7 +72,7 @@ func deleteConfigMap(r *ServiceReconciler, ctx context.Context, req *ctrl.Reques
 }
 
 func deleteDeployment(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	_, _, namespacedName := tlbDeploymentName(req)
+	_, _, namespacedName := names.TLBDeploymentName(req)
 
 	var tmp appsv1.Deployment
 	err := r.Get(ctx, namespacedName, &tmp)
@@ -93,11 +90,11 @@ func deleteDeployment(r *ServiceReconciler, ctx context.Context, req *ctrl.Reque
 	return nil
 }
 
-func (lb *LoadBalancer) ensureConfigMap(r *ServiceReconciler, ctx context.Context) error {
+func (r *ServiceReconciler) ensureConfigMap(ctx context.Context, LB *lb.LoadBalancer) error {
 
 	name := types.NamespacedName{
-		Name:      lb.LoadBalancerObjects.Deployment.ObjectMeta.Name,
-		Namespace: lb.LoadBalancerObjects.Deployment.ObjectMeta.Namespace,
+		Name:      LB.Deployment.ObjectMeta.Name,
+		Namespace: LB.Deployment.ObjectMeta.Namespace,
 	}
 
 	var tmp corev1.ConfigMap
@@ -105,18 +102,18 @@ func (lb *LoadBalancer) ensureConfigMap(r *ServiceReconciler, ctx context.Contex
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
-		err = r.Create(ctx, lb.LoadBalancerObjects.ConfigMap)
+		err = r.Create(ctx, LB.ConfigMap)
 	} else {
-		err = r.Update(ctx, lb.LoadBalancerObjects.ConfigMap)
+		err = r.Update(ctx, LB.ConfigMap)
 	}
 	return err
 }
 
-func (lb *LoadBalancer) ensureDeployment(r *ServiceReconciler, ctx context.Context) error {
+func (r *ServiceReconciler) ensureDeployment(ctx context.Context, LB *lb.LoadBalancer) error {
 
 	name := types.NamespacedName{
-		Name:      lb.LoadBalancerObjects.Deployment.ObjectMeta.Name,
-		Namespace: lb.LoadBalancerObjects.Deployment.ObjectMeta.Namespace,
+		Name:      LB.Deployment.ObjectMeta.Name,
+		Namespace: LB.Deployment.ObjectMeta.Namespace,
 	}
 
 	var tmp appsv1.Deployment
@@ -124,15 +121,15 @@ func (lb *LoadBalancer) ensureDeployment(r *ServiceReconciler, ctx context.Conte
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
-		err = r.Create(ctx, lb.LoadBalancerObjects.Deployment)
+		err = r.Create(ctx, LB.Deployment)
 	} else {
-		err = r.Update(ctx, lb.LoadBalancerObjects.Deployment)
+		err = r.Update(ctx, LB.Deployment)
 	}
 	return err
 }
 
 func CheckForOrphanedDeplyments(r *ServiceReconciler, ctx context.Context) error {
-	ns := tlbNamespace()
+	ns := names.TLBNamespace()
 
 	fmt.Println("Check For Ophans")
 

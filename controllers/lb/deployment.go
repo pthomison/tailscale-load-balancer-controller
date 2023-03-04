@@ -1,21 +1,23 @@
-package controllers
+package lb
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/pthomison/tailscale-load-balancer-controller/controllers/names"
 )
 
-func (lb *LoadBalancer) renderDeployment() {
+func (LB *LoadBalancer) RenderDeployment() {
 
-	cfName, _, _ := tlbConfigMapName(lb.req)
-	tsKubeSecretName, _, _ := tlbKubeSecretName(lb.req)
+	cfName, _, _ := names.TLBConfigMapName(LB.ServiceRequest)
+	tsKubeSecretName, _, _ := names.TLBKubeSecretName(LB.ServiceRequest)
 
-	deploymentName, deploymentNamespace, _ := tlbDeploymentName(lb.req)
+	deploymentName, deploymentNamespace, _ := names.TLBDeploymentName(LB.ServiceRequest)
 
-	selectorLabelsMap, _ := SelectorLabels(lb.req.Name, lb.req.Namespace)
+	selectorLabelsMap, _ := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
 
-	deployment := appsv1.Deployment{
+	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      deploymentName,
 			Namespace: deploymentNamespace,
@@ -30,11 +32,11 @@ func (lb *LoadBalancer) renderDeployment() {
 					Labels: selectorLabelsMap,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: lbServiceAccountName(),
+					ServiceAccountName: names.TLBServiceAccountName(),
 					Containers: []corev1.Container{
 						{
 							Name:            "tailscale",
-							Image:           tailscaleImage(),
+							Image:           names.TLBImage(),
 							ImagePullPolicy: corev1.PullAlways,
 							Env: []corev1.EnvVar{
 								{
@@ -42,9 +44,9 @@ func (lb *LoadBalancer) renderDeployment() {
 									ValueFrom: &corev1.EnvVarSource{
 										SecretKeyRef: &corev1.SecretKeySelector{
 											LocalObjectReference: corev1.LocalObjectReference{
-												Name: defaultSecret,
+												Name: names.DefaultSecret,
 											},
-											Key: defaultSecretKey,
+											Key: names.DefaultSecretKey,
 										},
 									},
 								},
@@ -73,7 +75,7 @@ func (lb *LoadBalancer) renderDeployment() {
 						},
 						{
 							Name:            "ip-reflector",
-							Image:           tailscaleImage(),
+							Image:           names.TLBImage(),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{{
 								Name:      "tailscale-socket",
@@ -107,24 +109,5 @@ func (lb *LoadBalancer) renderDeployment() {
 		},
 	}
 
-	lb.LoadBalancerObjects.Deployment = &deployment
-}
-
-func (lb *LoadBalancer) renderConfigMap() {
-	name, namespace, _ := tlbConfigMapName(lb.req)
-
-	selectorLabelsMap, _ := SelectorLabels(lb.req.Name, lb.req.Namespace)
-
-	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    selectorLabelsMap,
-		},
-		Data: map[string]string{
-			"haproxy.cfg": renderHaproxyConfig(lb.svc),
-		},
-	}
-
-	lb.LoadBalancerObjects.ConfigMap = configMap
+	LB.Deployment = deployment
 }

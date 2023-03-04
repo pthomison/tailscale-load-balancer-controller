@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pthomison/tailscale-load-balancer-controller/controllers/lb"
+	"github.com/pthomison/tailscale-load-balancer-controller/controllers/names"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -108,13 +110,13 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.Service, req ctrl.Request) error {
 	fmt.Printf("Service: %v/%v/%v\n", svc.Spec.Type, svc.Name, svc.Namespace)
 
-	lb := LoadBalancer{
-		req: &req,
-		svc: svc,
+	LB := &lb.LoadBalancer{
+		ServiceRequest: &req,
+		Service:        svc,
 	}
 
-	lb.Render()
-	err := lb.Inject(r, ctx)
+	LB.Render()
+	err := r.Inject(ctx, LB)
 	if err != nil {
 		return err
 	}
@@ -122,7 +124,7 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 	var lbPodList corev1.PodList
 	var loadbalancerIP string
 	for {
-		_, selector := SelectorLabels(lb.req.Name, lb.req.Namespace)
+		_, selector := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
 
 		err = r.List(ctx, &lbPodList, &client.ListOptions{
 			LabelSelector: client.MatchingLabelsSelector{
@@ -146,9 +148,9 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 		time.Sleep(5 * time.Second)
 	}
 
-	lb.svc.Spec.ExternalIPs = []string{loadbalancerIP}
+	LB.Service.Spec.ExternalIPs = []string{loadbalancerIP}
 
-	err = r.Update(ctx, lb.svc)
+	err = r.Update(ctx, LB.Service)
 	if err != nil {
 		return err
 	}
