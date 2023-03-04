@@ -46,7 +46,7 @@ local-image-build-and-deploy:
 	IMG=$(LOCAL_CONTROLLER_BUILD_IMG) $(MAKE) docker-push
 	IMG=$(LOCAL_TAILSCALE_LB_IMG) $(MAKE) docker-push
 
-	IMG=$(LOCAL_CONTROLLER_DEPLOY_IMG) $(MAKE) deploy
+	IMG=$(LOCAL_CONTROLLER_DEPLOY_IMG) TLB_IMG=$(LOCAL_TAILSCALE_LB_IMG) $(MAKE) deploy
 
 
 ##@ General
@@ -143,7 +143,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG} \
-		&& $(KUSTOMIZE) edit set annotation "pthomison.com/image:${IMG}"
+		&& $(KUSTOMIZE) edit set annotation "pthomison.com/tlb-image:${TLB_IMG}"
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 .PHONY: template

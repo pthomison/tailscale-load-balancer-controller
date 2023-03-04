@@ -76,7 +76,7 @@ spec:
         - name: TLB_IMAGE
           valueFrom:
             fieldRef:
-              fieldPath: metadata.annotations['pthomison.com/image']
+              fieldPath: metadata.annotations['pthomison.com/tlb-image']
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
