@@ -71,8 +71,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		startup = false
 	}
 
-	fmt.Println(req)
-
 	// Request the service
 	exists, svc, err := r.GetService(ctx, req.Name, req.Namespace)
 	if err != nil {
