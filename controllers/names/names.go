@@ -15,7 +15,7 @@ func TLBNamespace() string {
 	return "tailscale"
 }
 
-func TLBDeploymentName(req *ctrl.Request) (string, string, types.NamespacedName) {
+func TLBNamespacedName(req *ctrl.Request) (string, string, types.NamespacedName) {
 	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
 	namespace := TLBNamespace()
 	namespacedName := types.NamespacedName{
@@ -24,39 +24,6 @@ func TLBDeploymentName(req *ctrl.Request) (string, string, types.NamespacedName)
 	}
 
 	return name, namespace, namespacedName
-}
-
-func TLBConfigMapName(req *ctrl.Request) (string, string, types.NamespacedName) {
-	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
-	namespace := TLBNamespace()
-	namespacedName := types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	return name, namespace, namespacedName
-}
-
-func TLBKubeSecretName(req *ctrl.Request) (string, string, types.NamespacedName) {
-	name := fmt.Sprintf("tlb-%s-%s", req.Namespace, req.Name)
-	namespace := TLBNamespace()
-	namespacedName := types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}
-
-	return name, namespace, namespacedName
-}
-
-func TLBServiceAccountName() string {
-
-	name := os.Getenv("SERVICE_ACCOUNT_NAME")
-
-	if name == "" {
-		return "testing-tailscale-pod"
-	}
-
-	return name
 }
 
 func SelectorLabels(svcName string, svcNamespace string) (map[string]string, labels.Selector) {

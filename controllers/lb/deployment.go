@@ -10,10 +10,12 @@ import (
 
 func (LB *LoadBalancer) RenderDeployment() {
 
-	cfName, _, _ := names.TLBConfigMapName(LB.ServiceRequest)
-	tsKubeSecretName, _, _ := names.TLBKubeSecretName(LB.ServiceRequest)
+	cfName, _, _ := names.TLBNamespacedName(LB.ServiceRequest)
+	tsKubeSecretName, _, _ := names.TLBNamespacedName(LB.ServiceRequest)
 
-	deploymentName, deploymentNamespace, _ := names.TLBDeploymentName(LB.ServiceRequest)
+	deploymentName, deploymentNamespace, _ := names.TLBNamespacedName(LB.ServiceRequest)
+
+	serviceAccountName, _, _ := names.TLBNamespacedName(LB.ServiceRequest)
 
 	selectorLabelsMap, _ := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
 
@@ -32,7 +34,7 @@ func (LB *LoadBalancer) RenderDeployment() {
 					Labels: selectorLabelsMap,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: names.TLBServiceAccountName(),
+					ServiceAccountName: serviceAccountName,
 					Containers: []corev1.Container{
 						{
 							Name:            "tailscale",

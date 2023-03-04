@@ -18,6 +18,21 @@ func (r *ServiceReconciler) Inject(ctx context.Context, LB *lb.LoadBalancer) err
 		return err
 	}
 
+	err = r.ensureServiceAccount(ctx, LB.ServiceAccount)
+	if err != nil {
+		return err
+	}
+
+	err = r.ensureRole(ctx, LB.Role)
+	if err != nil {
+		return err
+	}
+
+	err = r.ensureRoleBinding(ctx, LB.RoleBinding)
+	if err != nil {
+		return err
+	}
+
 	err = r.ensureDeployment(ctx, LB.Deployment)
 	if err != nil {
 		return err
@@ -27,14 +42,29 @@ func (r *ServiceReconciler) Inject(ctx context.Context, LB *lb.LoadBalancer) err
 }
 
 func Delete(r *ServiceReconciler, ctx context.Context, req *ctrl.Request) error {
-	_, _, dpNamespacedName := names.TLBDeploymentName(req)
-	err := r.deleteDeployment(ctx, dpNamespacedName)
+	_, _, namespacedName := names.TLBNamespacedName(req)
+
+	err := r.deleteDeployment(ctx, namespacedName)
 	if err != nil {
 		return err
 	}
 
-	_, _, cmNamespacedName := names.TLBConfigMapName(req)
-	err = r.deleteConfigMap(ctx, cmNamespacedName)
+	err = r.deleteConfigMap(ctx, namespacedName)
+	if err != nil {
+		return err
+	}
+
+	err = r.deleteRoleBinding(ctx, namespacedName)
+	if err != nil {
+		return err
+	}
+
+	err = r.deleteServiceAccount(ctx, namespacedName)
+	if err != nil {
+		return err
+	}
+
+	err = r.deleteRole(ctx, namespacedName)
 	if err != nil {
 		return err
 	}

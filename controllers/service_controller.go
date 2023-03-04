@@ -31,10 +31,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// var (
-// 	startup = true
-// )
-
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
@@ -46,7 +42,9 @@ type ServiceReconciler struct {
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;update;delete;watch;patch
 //+kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;create;update;delete;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;create;update;delete;watch
-//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;create;update;delete
+//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;create;update;delete;watch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;create;update;delete;watch
+// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;create;update;delete;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

@@ -11,7 +11,7 @@ import (
 )
 
 func (LB *LoadBalancer) RenderConfigMap() {
-	name, namespace, _ := names.TLBConfigMapName(LB.ServiceRequest)
+	name, namespace, _ := names.TLBNamespacedName(LB.ServiceRequest)
 
 	selectorLabelsMap, _ := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
 
