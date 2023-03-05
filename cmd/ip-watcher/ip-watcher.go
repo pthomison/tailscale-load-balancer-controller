@@ -15,56 +15,76 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+const (
+	sleepTime        = 5 * time.Second
+	tsSocketLocation = "/tmp/tailscaled.sock"
+	ipAnnotation     = "operator.pthomison.com/tailscale-ip"
+)
+
 var (
-	ctx = context.Background()
-
-	sleepTime = 5 * time.Second
-
-	k8sClient client.Client
-
-	podName = os.Getenv("HOSTNAME")
+	ctx          context.Context
+	k8s          client.Client
+	podName      string
+	podNamespace string
+	tailscaleIP  string
 )
 
 func init() {
+	ctx = context.Background()
+
 	var err error
-	k8sClient, err = client.New(config.GetConfigOrDie(), client.Options{})
+	k8s, err = client.New(config.GetConfigOrDie(), client.Options{})
 	errcheck.Check(err)
+
+	podName = os.Getenv("HOSTNAME")
+	podNamespace = "tailscale"
 }
 
 func main() {
-
-	time.Sleep(5 * time.Second)
+	for {
+		_, err := os.Stat(tsSocketLocation)
+		if err == nil {
+			break
+		}
+		fmt.Println("Waiting for Tailscale socket")
+		time.Sleep(1 * time.Second)
+	}
 
 	tsClient := tailscale.LocalClient{
-		Socket: "/tmp/tailscaled.sock",
+		Socket: tsSocketLocation,
 	}
 
 	for {
 		state, err := tsClient.Status(ctx)
 		errcheck.Check(err)
 
-		var tsip4 string
-
 		for _, ip := range state.TailscaleIPs {
 			if ip.Is4() {
-				tsip4 = ip.String()
+				ips := ip.String()
+
+				if tailscaleIP != ips {
+					tailscaleIP = ips
+					fmt.Printf("Tailscale IP Detected: %s\n", tailscaleIP)
+				}
 			}
 		}
 
 		pod := &corev1.Pod{}
 
-		k8sClient.Get(ctx, types.NamespacedName{
+		k8s.Get(ctx, types.NamespacedName{
 			Name:      podName,
-			Namespace: "tailscale",
+			Namespace: podNamespace,
 		}, pod)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
 
-		if pod.Annotations["operator.pthomison.com/tailscale-ip"] != tsip4 {
-			pod.Annotations["operator.pthomison.com/tailscale-ip"] = tsip4
-			err := k8sClient.Update(ctx, pod)
+		if pod.Annotations[ipAnnotation] != tailscaleIP {
+			fmt.Printf("Updating Pod Annotation: %s==%s\n", ipAnnotation, tailscaleIP)
+
+			pod.Annotations[ipAnnotation] = tailscaleIP
+			err := k8s.Update(ctx, pod)
 			if err != nil {
 				fmt.Println(err)
 			}

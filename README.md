@@ -46,6 +46,9 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 - Better logging
     + Reasonable log updates as the system operates
     + Use a logger instead of printing to stdout
+- Load testing
+- Requeue LB services for a duration && ensure load-balancers are plumbed correctly
+- Reqs/Limits for tlb pods
 
 ## How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
@@ -79,6 +82,7 @@ I'm still fairly new to the kubebuilder/controller-runtime scene, so as I've bui
 - When to use labels vs annotations? 
     + I've generally understood that annotations are for computer generated items && labels were for human consumption, but some functions seem to work better with labels [out of the box](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.5/pkg/client#ListOptions)
 
+- Can I watch a single object or is watch exclusive to a List?
 
 ## License
 
