@@ -43,7 +43,9 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 - Configurable Namespace
 - Configurable secret/key
 - Using a NS scoped cache instead of the Uncached Client
-
+- Better logging
+    + Reasonable log updates as the system operates
+    + Use a logger instead of printing to stdout
 
 ## How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
