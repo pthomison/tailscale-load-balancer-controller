@@ -1,42 +1,5 @@
 # syntax=docker/dockerfile:1.3-labs
 
-# FROM tailscale/tailscale:stable
-
-# RUN apk add curl bash
-
-# RUN <<EOF
-# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-# install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-# EOF
-
-# COPY <<COPYEOF /ip-monitor-entrypoint.sh
-# #!/usr/bin/env bash
-
-# sleep 10
-
-# while true
-# do
-#     IP=\"\$(tailscale --socket /tmp/tailscaled.sock ip --4)\"
-
-#     if [[ \"\$IP\" != \"\" ]];
-#     then
-#         echo "Update IP: \${IP}"
-#         kubectl annotate pod \$HOSTNAME \"operator.pthomison.com/tailscale-ip=\${IP}\"
-#     fi
-
-#     sleep 30
-# done
-# COPYEOF
-
-# RUN chmod +x /ip-monitor-entrypoint.sh
-
-# ENTRYPOINT [ "/entrypoint.sh" ]
-
-
-###########
-
-
-# Build the manager binary
 FROM golang:1.20 as builder
 ARG TARGETOS
 ARG TARGETARCH
@@ -51,8 +14,6 @@ RUN go mod download
 
 # Copy the go source
 COPY cmd/ cmd/
-# COPY api/ api/
-# COPY controllers/ controllers/
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
@@ -64,7 +25,6 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o ip
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM tailscale/tailscale:stable
-RUN apk add curl bash
 
 WORKDIR /
 COPY --from=builder /workspace/ip-updater .

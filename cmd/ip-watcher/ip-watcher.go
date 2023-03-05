@@ -16,10 +16,6 @@ import (
 )
 
 var (
-	tsClient = tailscale.LocalClient{
-		Socket: "/tmp/tailscaled.sock",
-	}
-
 	ctx = context.Background()
 
 	sleepTime = 5 * time.Second
@@ -36,6 +32,13 @@ func init() {
 }
 
 func main() {
+
+	time.Sleep(5 * time.Second)
+
+	tsClient := tailscale.LocalClient{
+		Socket: "/tmp/tailscaled.sock",
+	}
+
 	for {
 		state, err := tsClient.Status(ctx)
 		errcheck.Check(err)
