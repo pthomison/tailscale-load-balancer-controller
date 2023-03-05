@@ -281,7 +281,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    pthomison.com/tlb-image: pthomison/tailscale-lb:2677f7c
+    pthomison.com/tlb-image: pthomison/tailscale-lb:29f14ba
   labels:
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: tailscale-load-balancer-controller
@@ -301,7 +301,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
-        pthomison.com/tlb-image: pthomison/tailscale-lb:2677f7c
+        pthomison.com/tlb-image: pthomison/tailscale-lb:29f14ba
       labels:
         control-plane: controller-manager
     spec:
@@ -338,7 +338,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['pthomison.com/tlb-image']
-        image: pthomison/tailscale-lb-controller:2677f7c
+        image: pthomison/tailscale-lb-controller:29f14ba
         livenessProbe:
           httpGet:
             path: /healthz

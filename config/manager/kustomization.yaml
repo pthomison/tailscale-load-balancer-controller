@@ -5,6 +5,6 @@ kind: Kustomization
 images:
 - name: controller
   newName: pthomison/tailscale-lb-controller
-  newTag: 2677f7c
+  newTag: 29f14ba
 commonAnnotations:
-  pthomison.com/tlb-image: pthomison/tailscale-lb:2677f7c
+  pthomison.com/tlb-image: pthomison/tailscale-lb:29f14ba
