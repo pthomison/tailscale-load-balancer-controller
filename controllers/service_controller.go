@@ -34,18 +34,19 @@ import (
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	StartUp bool
+	Scheme         *runtime.Scheme
+	StartUp        bool
+	UncachedClient client.Client
 }
 
-//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;update;patch
-//+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;update;delete;watch;patch
-//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;create;update;delete;watch;patch
-//+kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;create;update;delete;watch
-//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;create;update;delete;watch
-//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;create;update;delete;watch
-// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=roles,verbs=get;list;create;update;delete;watch
-// +kubebuilder:rbac:groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;list;create;update;delete;watch
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;update
+//+kubebuilder:rbac:namespace="system",groups="",resources=pods,verbs=get;list;update
+//+kubebuilder:rbac:namespace="system",groups="",resources=secrets,verbs=get;create;update
+//+kubebuilder:rbac:namespace="system",groups="",resources=configmaps,verbs=get;create;update;delete
+//+kubebuilder:rbac:namespace="system",groups="",resources=serviceaccounts,verbs=get;create;update;delete
+//+kubebuilder:rbac:namespace="system",groups="apps",resources=deployments,verbs=get;list;create;update;delete
+// +kubebuilder:rbac:namespace="system",groups="rbac.authorization.k8s.io",resources=roles,verbs=get;create;update;delete
+// +kubebuilder:rbac:namespace="system",groups="rbac.authorization.k8s.io",resources=rolebindings,verbs=get;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -114,10 +115,11 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 	for {
 		_, selector := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
 
-		err = r.List(ctx, &lbPodList, &client.ListOptions{
+		err = r.UncachedClient.List(ctx, &lbPodList, &client.ListOptions{
 			LabelSelector: client.MatchingLabelsSelector{
 				Selector: selector,
 			},
+			Namespace: LB.Deployment.Namespace,
 		})
 		if err != nil {
 			return err

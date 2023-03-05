@@ -78,10 +78,11 @@ func CheckForOrphanedDeplyments(r *ServiceReconciler, ctx context.Context) error
 	fmt.Println("Check For Ophans")
 
 	var deploymentList appsv1.DeploymentList
-	err := r.List(ctx, &deploymentList, client.InNamespace(ns), client.MatchingLabels{
+	err := r.UncachedClient.List(ctx, &deploymentList, client.InNamespace(ns), client.MatchingLabels{
 		names.CommonLabel: names.CommonLabelVal,
 	})
 	if client.IgnoreNotFound(err) != nil {
+		fmt.Println("--------")
 		return err
 	}
 

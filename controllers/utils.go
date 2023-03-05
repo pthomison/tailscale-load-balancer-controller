@@ -35,7 +35,7 @@ func (r *ServiceReconciler) ensureConfigMap(ctx context.Context, cm *corev1.Conf
 	}
 
 	var tmp corev1.ConfigMap
-	err := r.Get(ctx, name, &tmp)
+	err := r.UncachedClient.Get(ctx, name, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -54,7 +54,7 @@ func (r *ServiceReconciler) ensureDeployment(ctx context.Context, d *appsv1.Depl
 	}
 
 	var tmp appsv1.Deployment
-	err := r.Get(ctx, name, &tmp)
+	err := r.UncachedClient.Get(ctx, name, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -73,7 +73,7 @@ func (r *ServiceReconciler) ensureServiceAccount(ctx context.Context, sa *corev1
 	}
 
 	var tmp corev1.ServiceAccount
-	err := r.Get(ctx, name, &tmp)
+	err := r.UncachedClient.Get(ctx, name, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -92,7 +92,7 @@ func (r *ServiceReconciler) ensureRole(ctx context.Context, role *rbacv1.Role) e
 	}
 
 	var tmp rbacv1.Role
-	err := r.Get(ctx, name, &tmp)
+	err := r.UncachedClient.Get(ctx, name, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -111,7 +111,7 @@ func (r *ServiceReconciler) ensureRoleBinding(ctx context.Context, rb *rbacv1.Ro
 	}
 
 	var tmp rbacv1.RoleBinding
-	err := r.Get(ctx, name, &tmp)
+	err := r.UncachedClient.Get(ctx, name, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -124,7 +124,7 @@ func (r *ServiceReconciler) ensureRoleBinding(ctx context.Context, rb *rbacv1.Ro
 
 func (r *ServiceReconciler) deleteConfigMap(ctx context.Context, namespacedName types.NamespacedName) error {
 	var tmp corev1.ConfigMap
-	err := r.Get(ctx, namespacedName, &tmp)
+	err := r.UncachedClient.Get(ctx, namespacedName, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -141,7 +141,7 @@ func (r *ServiceReconciler) deleteConfigMap(ctx context.Context, namespacedName 
 
 func (r *ServiceReconciler) deleteDeployment(ctx context.Context, namespacedName types.NamespacedName) error {
 	var tmp appsv1.Deployment
-	err := r.Get(ctx, namespacedName, &tmp)
+	err := r.UncachedClient.Get(ctx, namespacedName, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -158,7 +158,7 @@ func (r *ServiceReconciler) deleteDeployment(ctx context.Context, namespacedName
 
 func (r *ServiceReconciler) deleteServiceAccount(ctx context.Context, namespacedName types.NamespacedName) error {
 	var tmp corev1.ServiceAccount
-	err := r.Get(ctx, namespacedName, &tmp)
+	err := r.UncachedClient.Get(ctx, namespacedName, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -175,7 +175,7 @@ func (r *ServiceReconciler) deleteServiceAccount(ctx context.Context, namespaced
 
 func (r *ServiceReconciler) deleteRole(ctx context.Context, namespacedName types.NamespacedName) error {
 	var tmp rbacv1.Role
-	err := r.Get(ctx, namespacedName, &tmp)
+	err := r.UncachedClient.Get(ctx, namespacedName, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
@@ -192,7 +192,7 @@ func (r *ServiceReconciler) deleteRole(ctx context.Context, namespacedName types
 
 func (r *ServiceReconciler) deleteRoleBinding(ctx context.Context, namespacedName types.NamespacedName) error {
 	var tmp rbacv1.RoleBinding
-	err := r.Get(ctx, namespacedName, &tmp)
+	err := r.UncachedClient.Get(ctx, namespacedName, &tmp)
 	if client.IgnoreNotFound(err) != nil {
 		return err
 	} else if err != nil {
