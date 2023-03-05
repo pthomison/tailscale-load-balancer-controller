@@ -2,7 +2,7 @@
 apiVersion: v2
 type: application
 appVersion: "0.0.1"
-version: 0.0.5
+version: 0.0.6
 name: tailscale-load-balancer-controller
 description: ""
 sources:

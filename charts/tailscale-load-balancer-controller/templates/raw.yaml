@@ -57,10 +57,11 @@ rules:
   - patch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   creationTimestamp: null
   name: tailscale-lb-controller-manager-role
+  namespace: tailscale
 rules:
 - apiGroups:
   - ""
@@ -70,33 +71,23 @@ rules:
   - create
   - delete
   - get
-  - list
   - update
-  - watch
 - apiGroups:
   - ""
   resources:
   - pods
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
   - update
-  - watch
 - apiGroups:
   - ""
   resources:
   - secrets
   verbs:
   - create
-  - delete
   - get
-  - list
-  - patch
   - update
-  - watch
 - apiGroups:
   - ""
   resources:
@@ -105,19 +96,7 @@ rules:
   - create
   - delete
   - get
-  - list
   - update
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - apps
   resources:
@@ -128,7 +107,6 @@ rules:
   - get
   - list
   - update
-  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -137,9 +115,7 @@ rules:
   - create
   - delete
   - get
-  - list
   - update
-  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -147,6 +123,20 @@ rules:
   verbs:
   - create
   - delete
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: tailscale-lb-controller-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
   - get
   - list
   - update
@@ -210,6 +200,27 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: tailscale-lb-controller-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: tailscale-lb-controller-controller-manager
+  namespace: tailscale
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: tailscale-load-balancer-controller
+    app.kubernetes.io/instance: manager-rolebinding
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: clusterrolebinding
+    app.kubernetes.io/part-of: tailscale-load-balancer-controller
+  name: tailscale-lb-controller-manager-rolebinding
+  namespace: tailscale
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tailscale-lb-controller-manager-role
 subjects:
 - kind: ServiceAccount
   name: tailscale-lb-controller-controller-manager
@@ -281,7 +292,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    pthomison.com/tlb-image: pthomison/tailscale-lb:29f14ba
+    pthomison.com/tlb-image: pthomison/tailscale-lb:a4d5bfb
   labels:
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: tailscale-load-balancer-controller
@@ -301,7 +312,7 @@ spec:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
-        pthomison.com/tlb-image: pthomison/tailscale-lb:29f14ba
+        pthomison.com/tlb-image: pthomison/tailscale-lb:a4d5bfb
       labels:
         control-plane: controller-manager
     spec:
@@ -338,7 +349,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['pthomison.com/tlb-image']
-        image: pthomison/tailscale-lb-controller:29f14ba
+        image: pthomison/tailscale-lb-controller:a4d5bfb
         livenessProbe:
           httpGet:
             path: /healthz
