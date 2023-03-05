@@ -34,8 +34,8 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 - ~~GH actions work, make sure image & chart publishing is working~~
 - ~~Better "ip-updater" solution/loop~~
 - Configurable userspace vs kernel wireguard
-- Stop having trash commit messages on main
-- Scope down service account permissions
+- ~~Stop having trash commit messages on main~~
+- ~~Scope down service account permissions~~
 - ~~Separate service account for lb pods~~
 - ~~Garbage Collection of lb pods~~
 - ~~Easy way to toggle the use of dev images vs dockerhub~~
