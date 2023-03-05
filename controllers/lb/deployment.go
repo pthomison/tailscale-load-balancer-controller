@@ -84,7 +84,7 @@ func (LB *LoadBalancer) RenderDeployment() {
 								MountPath: "/tmp",
 							}},
 							Command: []string{
-								"/ip-monitor-entrypoint.sh",
+								"/ip-updater",
 							},
 						},
 					},

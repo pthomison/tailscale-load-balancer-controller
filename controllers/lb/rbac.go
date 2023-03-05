@@ -38,7 +38,7 @@ func (LB *LoadBalancer) RenderRole() {
 			{
 				APIGroups: []string{""},
 				Resources: []string{"pods"},
-				Verbs:     []string{"get", "patch"},
+				Verbs:     []string{"get", "update"},
 			},
 			{
 				APIGroups: []string{""},

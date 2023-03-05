@@ -32,7 +32,7 @@ helm install tailscale-load-balancer-controller tailscale-load-balancer-controll
 - ~~stop using "latest" for the deployed LB pod~~
 - better helm chart
 - ~~GH actions work, make sure image & chart publishing is working~~
-- Better "ip-updater" solution/loop
+- ~~Better "ip-updater" solution/loop~~
 - Configurable userspace vs kernel wireguard
 - Stop having trash commit messages on main
 - Scope down service account permissions

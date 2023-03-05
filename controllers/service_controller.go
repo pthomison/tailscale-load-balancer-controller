@@ -40,6 +40,7 @@ type ServiceReconciler struct {
 
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;update;patch
 //+kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;update;delete;watch;patch
+//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;create;update;delete;watch;patch
 //+kubebuilder:rbac:groups="apps",resources=deployments,verbs=get;list;create;update;delete;watch
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;create;update;delete;watch
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;create;update;delete;watch
