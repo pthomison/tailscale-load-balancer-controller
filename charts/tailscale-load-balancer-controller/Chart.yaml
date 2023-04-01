@@ -2,12 +2,12 @@
 apiVersion: v2
 type: application
 appVersion: "0.0.1"
-version: 0.0.7
+version: 0.0.8
 name: tailscale-load-balancer-controller
 description: ""
 sources:
   - https://github.com/pthomison/tailscale-load-balancer-controller
-  
+
 maintainers:
   - name: Patrick Thomison
     email: tbd@tbd.com
