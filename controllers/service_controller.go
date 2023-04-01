@@ -23,6 +23,7 @@ import (
 
 	"github.com/pthomison/tailscale-load-balancer-controller/controllers/lb"
 	"github.com/pthomison/tailscale-load-balancer-controller/controllers/names"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +40,9 @@ type ServiceReconciler struct {
 	UncachedClient client.Client
 }
 
-//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;update
+//+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch
+//+kubebuilder:rbac:groups="",resources=services/status,verbs=update
+
 //+kubebuilder:rbac:namespace="system",groups="",resources=pods,verbs=get;list;update
 //+kubebuilder:rbac:namespace="system",groups="",resources=secrets,verbs=get;create;update
 //+kubebuilder:rbac:namespace="system",groups="",resources=configmaps,verbs=get;create;update;delete
@@ -110,37 +113,32 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 		return err
 	}
 
-	var lbPodList corev1.PodList
-	var loadbalancerIP string
-	for {
-		_, selector := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
-
-		err = r.UncachedClient.List(ctx, &lbPodList, &client.ListOptions{
-			LabelSelector: client.MatchingLabelsSelector{
-				Selector: selector,
-			},
-			Namespace: LB.Deployment.Namespace,
-		})
-		if err != nil {
-			return err
-		}
-
-		if len(lbPodList.Items) != 0 {
-			pod := lbPodList.Items[0]
-
-			annotation := fmt.Sprintf("%s/tailscale-ip", names.AnnotationBase)
-			if pod.Annotations[annotation] != "" {
-				loadbalancerIP = pod.Annotations[annotation]
-				break
-			}
-		}
-		fmt.Println("Waiting for tailscale IP")
-		time.Sleep(5 * time.Second)
+	_, selector := names.SelectorLabels(LB.ServiceRequest.Name, LB.ServiceRequest.Namespace)
+	lbIP, lbDNS, err := WaitForTailscaleAnnotations(ctx, r.UncachedClient, selector, LB.Deployment.Namespace)
+	if err != nil {
+		return err
 	}
 
-	LB.Service.Spec.ExternalIPs = []string{loadbalancerIP}
+	fmt.Printf("Discovered tailscaled IP: %v\n", lbIP)
+	fmt.Printf("Discovered tailscaled DNS: %v\n", lbDNS)
 
-	err = r.Update(ctx, LB.Service)
+	// LB.Service.Spec.ExternalIPs = []string{loadbalancerIP}
+
+	// err = r.Update(ctx, LB.Service)
+	// if err != nil {
+	// 	return err
+	// }
+
+	lbIngress := corev1.LoadBalancerIngress{
+		IP: lbIP,
+	}
+	if lbDNS != "" {
+		lbIngress.Hostname = lbDNS
+	}
+
+	LB.Service.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{lbIngress}
+
+	err = r.Status().Update(ctx, LB.Service)
 	if err != nil {
 		return err
 	}
@@ -150,4 +148,46 @@ func (r *ServiceReconciler) EnsureLoadBalancer(ctx context.Context, svc *corev1.
 
 func (r *ServiceReconciler) DestroyLoadBalancer(ctx context.Context, req ctrl.Request) error {
 	return Delete(r, ctx, &req)
+}
+
+func WaitForTailscaleAnnotations(ctx context.Context, k8sClient client.Client, podSelector labels.Selector, namespace string) (string, string, error) {
+	var lbPodList corev1.PodList
+
+	tailscaleIP := ""
+	tailscaleDNS := ""
+	var err error
+
+	for {
+		err := k8sClient.List(ctx, &lbPodList, &client.ListOptions{
+			LabelSelector: client.MatchingLabelsSelector{
+				Selector: podSelector,
+			},
+			Namespace: namespace,
+		})
+		if err != nil {
+			return tailscaleIP, tailscaleDNS, err
+		}
+
+		if len(lbPodList.Items) != 0 {
+			pod := lbPodList.Items[0]
+
+			ipAnnotation := fmt.Sprintf("%s/tailscale-ip", names.AnnotationBase)
+			dnsAnnotation := fmt.Sprintf("%s/tailscale-dns", names.AnnotationBase)
+			if pod.Annotations[ipAnnotation] != "" {
+				tailscaleIP = pod.Annotations[ipAnnotation]
+			}
+			if pod.Annotations[dnsAnnotation] != "" {
+				tailscaleDNS = pod.Annotations[dnsAnnotation]
+			}
+
+			if tailscaleIP != "" {
+				break
+			}
+
+		}
+		fmt.Println("Waiting for tailscale initialization")
+		time.Sleep(5 * time.Second)
+	}
+
+	return tailscaleIP, tailscaleDNS, err
 }

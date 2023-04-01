@@ -12,8 +12,13 @@ rules:
   verbs:
   - get
   - list
-  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

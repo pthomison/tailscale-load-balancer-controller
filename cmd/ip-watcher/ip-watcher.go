@@ -4,21 +4,24 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/pthomison/errcheck"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"tailscale.com/client/tailscale"
+	"tailscale.com/ipn/ipnstate"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
 	sleepTime        = 5 * time.Second
 	tsSocketLocation = "/tmp/tailscaled.sock"
 	ipAnnotation     = "operator.pthomison.com/tailscale-ip"
+	dnsAnnotation    = "operator.pthomison.com/tailscale-dns"
 )
 
 var (
@@ -27,6 +30,7 @@ var (
 	podName      string
 	podNamespace string
 	tailscaleIP  string
+	tailscaleDNS string
 )
 
 func init() {
@@ -55,41 +59,63 @@ func main() {
 	}
 
 	for {
-		state, err := tsClient.Status(ctx)
-		errcheck.Check(err)
-
-		for _, ip := range state.TailscaleIPs {
-			if ip.Is4() {
-				ips := ip.String()
-
-				if tailscaleIP != ips {
-					tailscaleIP = ips
-					fmt.Printf("Tailscale IP Detected: %s\n", tailscaleIP)
-				}
-			}
-		}
-
+		// Capture Pod
 		pod := &corev1.Pod{}
-
 		k8s.Get(ctx, types.NamespacedName{
 			Name:      podName,
 			Namespace: podNamespace,
 		}, pod)
 
-		if pod.Annotations == nil {
-			pod.Annotations = make(map[string]string)
+		// Capture Tailscale Status
+		state, err := tsClient.Status(ctx)
+		errcheck.Check(err)
+
+		// Check IPV4 Address & Update If Needed
+		currentIP := captureIP4(state)
+		if tailscaleIP != currentIP {
+			tailscaleIP = currentIP
+			fmt.Printf("Tailscale IP Detected: %s\n", tailscaleIP)
+
+			pod = updateAnnotation(pod, ipAnnotation, tailscaleIP)
 		}
 
-		if pod.Annotations[ipAnnotation] != tailscaleIP {
-			fmt.Printf("Updating Pod Annotation: %s==%s\n", ipAnnotation, tailscaleIP)
+		// Check Tailscale MagicDNS & Update If Needed
+		currentDNS := state.Self.DNSName
+		if tailscaleDNS != currentDNS {
+			tailscaleDNS = currentDNS
+			fmt.Printf("Tailscale DNS Detected: %s\n", tailscaleDNS)
 
-			pod.Annotations[ipAnnotation] = tailscaleIP
-			err := k8s.Update(ctx, pod)
-			if err != nil {
-				fmt.Println(err)
-			}
+			tailscaleDNS = strings.Trim(tailscaleDNS, ".")
+
+			pod = updateAnnotation(pod, dnsAnnotation, tailscaleDNS)
 		}
+
+		_ = pod
 
 		time.Sleep(sleepTime)
 	}
+}
+
+func updateAnnotation(pod *corev1.Pod, annotationKey string, annotationValue string) *corev1.Pod {
+	fmt.Printf("Updating Pod (%s) Annotation: %s==%s\n", pod.Name, annotationKey, annotationValue)
+
+	if pod.Annotations == nil {
+		pod.Annotations = make(map[string]string)
+	}
+
+	pod.Annotations[annotationKey] = annotationValue
+	err := k8s.Update(ctx, pod)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return pod
+}
+
+func captureIP4(state *ipnstate.Status) string {
+	for _, ip := range state.TailscaleIPs {
+		if ip.Is4() {
+			return ip.String()
+		}
+	}
+	return ""
 }
